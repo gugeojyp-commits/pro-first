@@ -4,23 +4,116 @@ import streamlit as st
 # 페이지 기본 설정
 st.set_page_config(
     page_title="국어 표준 발음 평가",
+    page_icon="✏️",
     layout="centered"
 )
 
-# 기본 원본 데이터 (영역/카테고리별 분리)
+# -----------------------------------------------------------------------------
+# 🎨 커스텀 CSS 및 웹폰트(배민체/귀여운 글씨체) 적용
+# -----------------------------------------------------------------------------
+custom_css = """
+<style>
+/* 1. Google Fonts에서 'Jua'(배달의민족 주아체느낌) 및 'Nanum Pen Script' 로드 */
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gamja+Flower&display=swap');
+
+/* 전체 기본 폰트 적용 (감자꽃 / Jua) */
+html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
+    font-family: 'Jua', 'Gamja Flower', sans-serif !important;
+}
+
+/* 메인 배경 및 패딩 지정 */
+.main {
+    background-color: #f7f9fc;
+}
+
+/* 제목 스타일 */
+h1 {
+    color: #2c3e50;
+    text-align: center;
+    font-size: 2.3rem !important;
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+    border-bottom: 3px dashed #74b9ff;
+}
+
+h3 {
+    color: #0984e3;
+    font-size: 1.5rem !important;
+}
+
+/* 카드 형태 컨테이너 */
+.quiz-card {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 18px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+    border: 2px solid #e1e8ef;
+    margin-bottom: 20px;
+}
+
+/* 입력창 스타일 */
+.stTextInput > div > div > input {
+    border-radius: 12px !important;
+    border: 2px solid #dfe6e9 !important;
+    font-size: 1.1rem !important;
+    padding: 10px 15px !important;
+}
+
+.stTextInput > div > div > input:focus {
+    border-color: #74b9ff !important;
+    box-shadow: 0 0 8px rgba(116, 185, 255, 0.4) !important;
+}
+
+/* 버튼 스타일 세련되게 변경 */
+.stButton > button {
+    border-radius: 14px !important;
+    font-size: 1.15rem !important;
+    font-weight: bold !important;
+    padding: 10px 24px !important;
+    transition: all 0.2s ease-in-out !important;
+    border: none !important;
+    background: linear-gradient(135deg, #74b9ff, #0984e3) !important;
+    color: white !important;
+    box-shadow: 0 4px 10px rgba(9, 132, 227, 0.2) !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(9, 132, 227, 0.3) !important;
+}
+
+/* 라디오 버튼 선택창 커스텀 */
+div[role="radiogroup"] {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+/* 프로그레스바 색상 개선 */
+.stProgress > div > div > div > div {
+    background-color: #00b894 !important;
+}
+</style>
+"""
+st.markdown(custom_css, unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# 📚 기본 원본 데이터 (영역/카테고리별 분리)
+# -----------------------------------------------------------------------------
 RAW_QUIZ_DATA = {
     "1. 표준 발음의 개념과 원칙": [
         {
             "id": 1,
             "type": "short",
-            "question": "사람마다 발음하는 법이 달라서 [      ]에 지장이 생기는 것을 막기 위해 발음의 표준을 정해 놓은 것을 '표준 발음'이라고 합니다. 빈칸에 들어갈 알맞은 단어를 쓰시오. (띄어쓰기 없이 작성할 것)",
+            "question": "사람마다 발음하는 법이 달라서 [     ]에 지장이 생기는 것을 막기 위해 발음의 표준을 정해 놓은 것을 '표준 발음'이라고 합니다. 빈칸에 들어갈 알맞은 단어를 쓰시오. (띄어쓰기 없이 작성할 것)",
             "answer": "의사소통",
             "explanation": "표준 발음은 국어를 쓰는 사람들 사이에서 발음이 달라 의사소통에 지장이 생기는 것을 막기 위해 정한 약속입니다."
         },
         {
             "id": 2,
             "type": "short",
-            "question": "표준 발음은 '표준어의 실제 발음을 따르되, 국어의 전통성과 [      ]을 고려하여 정함을 원칙으로 한다.'에서 빈칸에 들어갈 단어를 쓰시오.",
+            "question": "표준 발음은 '표준어의 실제 발음을 따르되, 국어의 전통성과 [     ]을 고려하여 정함을 원칙으로 한다.'에서 빈칸에 들어갈 단어를 쓰시오.",
             "answer": "합리성",
             "explanation": "표준 발음의 3대 원칙은 ① 표준어의 실제 발음, ② 국어의 전통성, ③ 합리성입니다."
         },
@@ -280,23 +373,30 @@ if "quiz_list" not in st.session_state:
     st.session_state.checked_status = {}
     st.session_state.quiz_finished = False
 
-st.title("✏️ [국어] 표준 발음과 받침의 발음 형성 평가")
+# 앱 타이틀
+st.markdown("<h1>✏️ [국어] 표준 발음과 받침 형성 평가</h1>", unsafe_allow_html=True)
 
 # 2. 정보 입력 단계
 if not st.session_state.user_info_submitted:
-    st.subheader("👤 학생 정보를 입력하고 평가를 시작하세요.")
+    st.markdown("""
+    <div class="quiz-card">
+        <h3 style="text-align: center; margin-bottom: 20px;">👤 학생 정보 입력</h3>
+    </div>
+    """, unsafe_allow_html=True)
     
-    s_id = st.text_input("학번 (예: 10101)", key="input_s_id")
-    s_name = st.text_input("이름", key="input_s_name")
-    
-    if st.button("🚀 평가 시작하기", use_container_width=True):
-        if s_id.strip() and s_name.strip():
-            st.session_state.student_id = s_id.strip()
-            st.session_state.student_name = s_name.strip()
-            st.session_state.user_info_submitted = True
-            st.rerun()
-        else:
-            st.warning("⚠️ 학번과 이름을 모두 입력해 주세요!")
+    with st.container():
+        s_id = st.text_input("학번을 입력하세요 (예: 10101)", key="input_s_id")
+        s_name = st.text_input("이름을 입력하세요", key="input_s_name")
+        
+        st.write("")
+        if st.button("🚀 평가 시작하기", use_container_width=True):
+            if s_id.strip() and s_name.strip():
+                st.session_state.student_id = s_id.strip()
+                st.session_state.student_name = s_name.strip()
+                st.session_state.user_info_submitted = True
+                st.rerun()
+            else:
+                st.warning("⚠️ 학번과 이름을 모두 입력해 주세요!")
 
 # 3. 문제 풀이 단계 (정답을 맞춰야 넘어가는 1문항 진행 방식)
 elif not st.session_state.quiz_finished:
@@ -306,13 +406,24 @@ elif not st.session_state.quiz_finished:
     curr_q = quiz_list[curr_idx]
 
     # 상단 학생 정보 및 진행률
-    st.caption(f"학생: {st.session_state.student_name} ({st.session_state.student_id})")
-    st.progress((curr_idx + 1) / total_q)
-    st.write(f"**진행 상황: {curr_idx + 1} / {total_q} 문항**")
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        st.caption(f"👤 **학생:** {st.session_state.student_name} ({st.session_state.student_id})")
+    with col2:
+        st.caption(f"🎯 **진행 상황:** {curr_idx + 1} / {total_q} 문항")
     
-    # 문제 영역 안내
-    st.markdown(f"### 📌 {curr_q['category']}")
-    st.markdown(f"#### Q{curr_idx + 1}. {curr_q['question']}")
+    st.progress((curr_idx + 1) / total_q)
+    st.write("")
+
+    # 카드 스타일 안에 문제배치
+    st.markdown(f"""
+    <div class="quiz-card">
+        <span style="background-color: #e3f2fd; color: #0984e3; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;">
+            📌 {curr_q['category']}
+        </span>
+        <h3 style="margin-top: 15px; color: #2d3436;">Q{curr_idx + 1}. {curr_q['question']}</h3>
+    </div>
+    """, unsafe_allow_html=True)
 
     # 이전 답안 복원
     saved_ans = st.session_state.user_answers.get(curr_q["id"], "")
@@ -327,18 +438,29 @@ elif not st.session_state.quiz_finished:
 
     st.write("")
     
-    # 정답 검증 유틸 함수 (단답형 공백 및 대괄호 기호 유연한 처리)
+    # 정답 검증 유틸 함수
     def clean_text(text):
+        if isinstance(text, list):
+            return [t.replace(" ", "").replace("[", "").replace("]", "") for t in text]
         return text.replace(" ", "").replace("[", "").replace("]", "")
 
     # 정답 확인 버튼
-    if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}"):
+    if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}", use_container_width=True):
         if user_input:
             st.session_state.user_answers[curr_q["id"]] = user_input
             st.session_state.checked_status[curr_q["id"]] = True
             
             correct = curr_q["answer"]
-            is_correct = (clean_text(user_input) == clean_text(correct)) if curr_q["type"] == "short" else (user_input == correct)
+            
+            if curr_q["type"] == "short":
+                cleaned_user = clean_text(user_input)
+                cleaned_correct = clean_text(correct)
+                if isinstance(cleaned_correct, list):
+                    is_correct = cleaned_user in cleaned_correct
+                else:
+                    is_correct = (cleaned_user == cleaned_correct)
+            else:
+                is_correct = (user_input == correct)
             
             if is_correct:
                 st.session_state.passed_status[curr_q["id"]] = True
@@ -377,11 +499,17 @@ elif not st.session_state.quiz_finished:
 
 # 4. 최종 완료 화면
 else:
-    st.header(f"📊 {st.session_state.student_name} 학생의 최종 평가 완료!")
+    st.markdown(f"""
+    <div class="quiz-card" style="text-align: center; padding: 40px 20px;">
+        <h2>📊 {st.session_state.student_name} 학생, 축하합니다!</h2>
+        <p style="font-size: 1.2rem; color: #636e72;">모든 영역의 표준 발음 평가를 성공적으로 마쳤습니다.</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.balloons()
-    st.success("🎉 축하합니다! 모든 영역의 표준 발음 문제를 완벽하게 통과했습니다.")
+    st.success("🎉 모든 문항 통과 완료! 개념을 확실히 이해하셨네요.")
 
-    if st.button("🔄 처음부터 다시 풀기"):
+    if st.button("🔄 처음부터 다시 풀기", use_container_width=True):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
