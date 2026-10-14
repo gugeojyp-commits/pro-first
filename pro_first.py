@@ -381,10 +381,10 @@ RAW_QUIZ_DATA = {
         {
             "id": 16,
             "type": "choice",
-            "question": "밥값은 [ 1. 밥깝슨 / 2. 밥까븐 ] 누가 내는 거냐?",
-            "options": ["1. 밥깝슨", "2. 밥까븐"],
-            "answer": "1. 밥깝슨",
-            "explanation": "'은'은 조사(형식 형태소)입니다. 겹받침 'ㅄ'에서 첫째 받침 'ㅂ'은 남고, 둘째 받침 'ㅅ'이 연음되어 된소리 [ㅆ]으로 발음되므로 [밥깝슨]이 맞습니다."
+            "question": "밥값은 [ 1. 밥깝쓴 / 2. 밥까븐 ] 누가 내는 거냐?",
+            "options": ["1. 밥깝쓴", "2. 밥까븐"],
+            "answer": "1. 밥깝쓴",
+            "explanation": "'은'은 조사(형식 형태소)입니다. 겹받침 'ㅄ'에서 첫째 받침 'ㅂ'은 남고, 둘째 받침 'ㅅ'이 연음되어 된소리 [ㅆ]으로 발음되므로 [밥깝쓴]이 맞습니다."
         },
         {
             "id": 17,
@@ -558,10 +558,9 @@ elif not st.session_state.quiz_finished:
             st.caption("🔒 **정답을 맞혀야 다음 문제로 넘어갈 수 있습니다.**")
 
 # -----------------------------------------------------------------------------
-# 4. 최종 완료 화면 (구글 폼 제출 우선 + 오답 노트)
+# 4. 최종 완료 화면 (구글 폼 제출 완료 체크박스 제어)
 # -----------------------------------------------------------------------------
 else:
-    # 최초 1회 시도 시 오답이었던 문제 목록 추출
     wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.first_attempt_status.get(q["id"], False)]
     total_count = len(st.session_state.quiz_list)
     correct_count = total_count - len(wrong_q_list)
@@ -574,37 +573,46 @@ else:
             첫 시도 정답: {total_count}문항 중 <span style="color:#10B981;">{correct_count}개</span>
         </h3>
         <p style="color: #6B7280; font-size: 0.95rem; margin-top: 8px;">
-            퀴즈를 바탕으로 학습지를 정돈하고, <b>아래 구글 폼으로 반드시 먼저 제출</b>해주세요!
+            퀴즈를 바탕으로 학습지를 정돈하고, <b>아래 구글 폼으로 먼저 제출</b>해 주세요!
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # 🔗 [필수] 선생님의 구글 폼 URL을 여기에 넣어주세요!
+    # 🔗 [필수] 선생님의 구글 폼 URL을 여기에 넣으세요!
     google_form_url = "https://docs.google.com/forms"
 
     st.markdown("### 1️⃣ 구글 폼 제출하기 (필수)")
-    st.link_button("📝 선생님에게 완수 확인 제출하기 (클릭)", google_form_url, use_container_width=True)
+    st.link_button("📝 선생님에게 완수 확인 제출하기 (구글 폼 열기)", google_form_url, use_container_width=True)
+
+    st.write("")
+    # 🌟 구글 폼 제출 체크박스 추가
+    is_submitted_form = st.checkbox("✅ 위 버튼을 클릭하여 선생님에게 구글 폼 제출을 완료했습니다!")
 
     st.divider()
 
     st.markdown("### 2️⃣ 오답노트 및 복습하기")
     if len(wrong_q_list) > 0:
         st.warning(f"⚠️ 처음 시도에서 틀렸던 문제가 {len(wrong_q_list)}개 있습니다.")
-        if st.button("🔥 처음 틀렸던 문제만 오답노트로 다시 풀기", use_container_width=True):
-            st.session_state.quiz_list = wrong_q_list.copy()
-            st.session_state.current_index = 0
-            st.session_state.user_answers = {}
-            st.session_state.passed_status = {}
-            st.session_state.checked_status = {}
-            st.session_state.first_attempt_status = {}
-            st.session_state.quiz_finished = False
-            st.rerun()
+        
+        # 🔒 구글 폼 제출 체크박스가 체크되어야만 오답노트 버튼 활성화
+        if is_submitted_form:
+            if st.button("🔥 처음 틀렸던 문제만 오답노트로 다시 풀기", use_container_width=True):
+                st.session_state.quiz_list = wrong_q_list.copy()
+                st.session_state.current_index = 0
+                st.session_state.user_answers = {}
+                st.session_state.passed_status = {}
+                st.session_state.checked_status = {}
+                st.session_state.first_attempt_status = {}
+                st.session_state.quiz_finished = False
+                st.rerun()
+        else:
+            st.button("🔒 구글 폼 제출 완료 체크박스를 선택해야 오답노트가 열립니다", disabled=True, use_container_width=True)
+            st.caption("👆 위 **'구글 폼 제출을 완료했습니다!'** 체크박스에 체크해 주세요.")
     else:
         st.success("💯 첫 번째 시도에서 모든 문제를 완벽하게 맞춰 오답이 없습니다!")
 
     st.write("")
     st.write("")
-    # 실수 방지를 위해 가장 하단에 작게 배치
     with st.expander("🔄 처음부터 전체 문제 다시 시작하기"):
         if st.button("처음부터 새로 시작하기", use_container_width=True):
             for key in list(st.session_state.keys()):
