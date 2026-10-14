@@ -9,97 +9,157 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
-# 🎨 커스텀 CSS 및 웹폰트(배민체/귀여운 글씨체) 적용
+# 🎨 트렌디하고 세련된 모던 카드 UI Style (CSS)
 # -----------------------------------------------------------------------------
 custom_css = """
 <style>
-/* 1. Google Fonts에서 'Jua'(배달의민족 주아체느낌) 및 'Nanum Pen Script' 로드 */
-@import url('https://fonts.googleapis.com/css2?family=Jua&family=Gamja+Flower&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&family=Jua&display=swap');
 
-/* 전체 기본 폰트 적용 (감자꽃 / Jua) */
+/* 전체 배경 및 기본 폰트 설정 */
 html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
-    font-family: 'Jua', 'Gamja Flower', sans-serif !important;
+    font-family: 'Pretendard', 'Jua', sans-serif !important;
 }
 
-/* 메인 배경 및 패딩 지정 */
-.main {
-    background-color: #f7f9fc;
+.stApp {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-/* 제목 스타일 */
-h1 {
-    color: #2c3e50;
+/* 헤더 타이틀 */
+.main-title {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     text-align: center;
-    font-size: 2.3rem !important;
-    padding-bottom: 10px;
+    font-size: 2.2rem !important;
+    font-weight: 800;
     margin-bottom: 25px;
-    border-bottom: 3px dashed #74b9ff;
+    letter-spacing: -0.5px;
 }
 
-h3 {
-    color: #0984e3;
-    font-size: 1.5rem !important;
-}
-
-/* 카드 형태 컨테이너 */
+/* 입체감 있는 메인 카드 */
 .quiz-card {
-    background-color: #ffffff;
-    padding: 25px;
-    border-radius: 18px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
-    border: 2px solid #e1e8ef;
-    margin-bottom: 20px;
+    background: #ffffff;
+    padding: 28px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
 }
 
-/* 입력창 스타일 */
+.quiz-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, #6366F1, #8B5CF6);
+}
+
+/* 영역 안내 태그 */
+.category-badge {
+    display: inline-block;
+    background: #EEF2FF;
+    color: #4F46E5;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* 문제 질문 스타일 */
+.question-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1F2937;
+    line-height: 1.5;
+    margin-top: 8px;
+}
+
+/* 입력창 커스텀 */
 .stTextInput > div > div > input {
-    border-radius: 12px !important;
-    border: 2px solid #dfe6e9 !important;
+    border-radius: 16px !important;
+    border: 2px solid #E5E7EB !important;
     font-size: 1.1rem !important;
-    padding: 10px 15px !important;
+    padding: 12px 18px !important;
+    background: #F9FAFB !important;
+    transition: all 0.2s ease;
 }
 
 .stTextInput > div > div > input:focus {
-    border-color: #74b9ff !important;
-    box-shadow: 0 0 8px rgba(116, 185, 255, 0.4) !important;
+    border-color: #6366F1 !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15) !important;
 }
 
-/* 버튼 스타일 세련되게 변경 */
+/* 객관식 보기 선택지 커스텀 */
+div[role="radiogroup"] {
+    background-color: transparent;
+    gap: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+div[role="radiogroup"] > label {
+    background: #F9FAFB !important;
+    border: 2px solid #E5E7EB !important;
+    border-radius: 16px !important;
+    padding: 12px 20px !important;
+    transition: all 0.2s ease !important;
+    margin-bottom: 0px !important;
+}
+
+div[role="radiogroup"] > label:hover {
+    background: #EEF2FF !important;
+    border-color: #A5B4FC !important;
+    transform: translateY(-1px);
+}
+
+/* 버튼 디자인 */
 .stButton > button {
-    border-radius: 14px !important;
-    font-size: 1.15rem !important;
-    font-weight: bold !important;
-    padding: 10px 24px !important;
-    transition: all 0.2s ease-in-out !important;
+    border-radius: 18px !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    padding: 12px 24px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     border: none !important;
-    background: linear-gradient(135deg, #74b9ff, #0984e3) !important;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%) !important;
     color: white !important;
-    box-shadow: 0 4px 10px rgba(9, 132, 227, 0.2) !important;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3) !important;
 }
 
 .stButton > button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(9, 132, 227, 0.3) !important;
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.45) !important;
 }
 
-/* 라디오 버튼 선택창 커스텀 */
-div[role="radiogroup"] {
-    background-color: #f8f9fa;
-    padding: 15px;
-    border-radius: 12px;
-    border: 1px solid #e9ecef;
-}
-
-/* 프로그레스바 색상 개선 */
+/* 프로그레스바 */
 .stProgress > div > div > div > div {
-    background-color: #00b894 !important;
+    background: linear-gradient(90deg, #10B981, #3B82F6) !important;
+    border-radius: 10px;
+}
+
+/* 해설 박스 */
+.explanation-box {
+    background: #F0F9FF;
+    border-left: 5px solid #0EA5E9;
+    padding: 16px 20px;
+    border-radius: 14px;
+    margin-top: 15px;
+    color: #0369A1;
+    font-size: 1rem;
+    line-height: 1.6;
 }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 📚 기본 원본 데이터 (영역/카테고리별 분리)
+# 📚 원본 데이터 (영역/카테고리별)
 # -----------------------------------------------------------------------------
 RAW_QUIZ_DATA = {
     "1. 표준 발음의 개념과 원칙": [
@@ -348,19 +408,14 @@ RAW_QUIZ_DATA = {
     ]
 }
 
-# 1. 세션 변수 초기화
-if "student_id" not in st.session_state:
-    st.session_state.student_id = ""
-if "student_name" not in st.session_state:
-    st.session_state.student_name = ""
-if "user_info_submitted" not in st.session_state:
-    st.session_state.user_info_submitted = False
-
-if "quiz_list" not in st.session_state:
+# -----------------------------------------------------------------------------
+# 1. 초기 퀴즈 데이터 세팅 함수
+# -----------------------------------------------------------------------------
+def reset_full_quiz():
     shuffled_list = []
     for category_name, items in RAW_QUIZ_DATA.items():
         category_items = items.copy()
-        random.shuffle(category_items)  # 영역 내부 순서 무작위 섞기
+        random.shuffle(category_items)
         for item in category_items:
             item_copy = item.copy()
             item_copy["category"] = category_name
@@ -369,18 +424,32 @@ if "quiz_list" not in st.session_state:
     st.session_state.quiz_list = shuffled_list
     st.session_state.current_index = 0
     st.session_state.user_answers = {}
-    st.session_state.passed_status = {}  # 맞춘 문제만 통과
+    st.session_state.passed_status = {}
     st.session_state.checked_status = {}
     st.session_state.quiz_finished = False
 
-# 앱 타이틀
-st.markdown("<h1>✏️ [국어] 표준 발음과 받침 형성 평가</h1>", unsafe_allow_html=True)
+# 세션 초기화
+if "student_id" not in st.session_state:
+    st.session_state.student_id = ""
+if "student_name" not in st.session_state:
+    st.session_state.student_name = ""
+if "user_info_submitted" not in st.session_state:
+    st.session_state.user_info_submitted = False
 
-# 2. 정보 입력 단계
+if "quiz_list" not in st.session_state:
+    reset_full_quiz()
+
+# 메인 타이틀
+st.markdown('<div class="main-title">✏️ [국어] 표준 발음과 받침 형성 평가</div>', unsafe_allow_html=True)
+
+# -----------------------------------------------------------------------------
+# 2. 학생 정보 입력 단계
+# -----------------------------------------------------------------------------
 if not st.session_state.user_info_submitted:
     st.markdown("""
-    <div class="quiz-card">
-        <h3 style="text-align: center; margin-bottom: 20px;">👤 감일고 2학년 학생 정보 입력</h3>
+    <div class="quiz-card" style="text-align: center;">
+        <h3 style="color: #4F46E5; margin-bottom: 8px;">👤 감일고 2학년 학생 정보 입력</h3>
+        <p style="color: #6B7280; font-size: 0.95rem;">학번과 이름을 입력하고 평가를 시작하세요.</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -398,53 +467,52 @@ if not st.session_state.user_info_submitted:
             else:
                 st.warning("⚠️ 학번과 이름을 모두 입력해 주세요!")
 
-# 3. 문제 풀이 단계 (정답을 맞춰야 넘어가는 1문항 진행 방식)
+# -----------------------------------------------------------------------------
+# 3. 문제 풀이 단계
+# -----------------------------------------------------------------------------
 elif not st.session_state.quiz_finished:
     quiz_list = st.session_state.quiz_list
     total_q = len(quiz_list)
     curr_idx = st.session_state.current_index
     curr_q = quiz_list[curr_idx]
 
-    # 상단 학생 정보 및 진행률
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        st.caption(f"👤 **학생:** {st.session_state.student_name} ({st.session_state.student_id})")
-    with col2:
-        st.caption(f"🎯 **진행 상황:** {curr_idx + 1} / {total_q} 문항")
+    # 상단 학생 정보 및 프로그레스바
+    col_info, col_prog = st.columns([1, 1])
+    with col_info:
+        st.markdown(f"👤 **학생:** {st.session_state.student_name} ({st.session_state.student_id})")
+    with col_prog:
+        st.markdown(f"<p style='text-align: right; font-weight:700; color:#4B5563;'>🎯 진행: {curr_idx + 1} / {total_q} 문항</p>", unsafe_allow_html=True)
     
     st.progress((curr_idx + 1) / total_q)
     st.write("")
 
-    # 카드 스타일 안에 문제배치
+    # 카드 디자인 속 문제 배치
     st.markdown(f"""
     <div class="quiz-card">
-        <span style="background-color: #e3f2fd; color: #0984e3; padding: 4px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: bold;">
-            📌 {curr_q['category']}
-        </span>
-        <h3 style="margin-top: 15px; color: #2d3436;">Q{curr_idx + 1}. {curr_q['question']}</h3>
+        <div class="category-badge">📌 {curr_q['category']}</div>
+        <div class="question-text">Q{curr_idx + 1}. {curr_q['question']}</div>
     </div>
     """, unsafe_allow_html=True)
 
     # 이전 답안 복원
     saved_ans = st.session_state.user_answers.get(curr_q["id"], "")
     
-    # 문제 양식
     if curr_q["type"] == "short":
-        user_input = st.text_input("정답 입력:", value=saved_ans, key=f"q_input_{curr_q['id']}")
+        user_input = st.text_input("정답 입력:", value=saved_ans, placeholder="답을 작성하세요...", key=f"q_input_{curr_q['id']}")
     else:
         opts = curr_q["options"]
         default_idx = opts.index(saved_ans) if saved_ans in opts else None
-        user_input = st.radio("알맞은 답 선택:", opts, index=default_idx, key=f"q_input_{curr_q['id']}")
+        user_input = st.radio("알맞은 답 선택:", opts, index=default_idx, key=f"q_input_{curr_q['id']}", label_visibility="collapsed")
 
     st.write("")
     
-    # 정답 검증 유틸 함수
+    # 정답 검증 함수
     def clean_text(text):
         if isinstance(text, list):
             return [t.replace(" ", "").replace("[", "").replace("]", "") for t in text]
         return text.replace(" ", "").replace("[", "").replace("]", "")
 
-    # 정답 확인 버튼
+    # 정답 제출 및 확인
     if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}", use_container_width=True):
         if user_input:
             st.session_state.user_answers[curr_q["id"]] = user_input
@@ -455,22 +523,16 @@ elif not st.session_state.quiz_finished:
             if curr_q["type"] == "short":
                 cleaned_user = clean_text(user_input)
                 cleaned_correct = clean_text(correct)
-                if isinstance(cleaned_correct, list):
-                    is_correct = cleaned_user in cleaned_correct
-                else:
-                    is_correct = (cleaned_user == cleaned_correct)
+                is_correct = (cleaned_user in cleaned_correct) if isinstance(cleaned_correct, list) else (cleaned_user == cleaned_correct)
             else:
                 is_correct = (user_input == correct)
             
-            if is_correct:
-                st.session_state.passed_status[curr_q["id"]] = True
-            else:
-                st.session_state.passed_status[curr_q["id"]] = False
+            st.session_state.passed_status[curr_q["id"]] = is_correct
             st.rerun()
         else:
             st.warning("⚠️ 먼저 정답을 입력하거나 선택해 주세요.")
 
-    # 정답 제출 후 결과 및 해설 출력
+    # 제출 후 해설 및 결과 표시
     if st.session_state.checked_status.get(curr_q["id"], False):
         ans = st.session_state.user_answers.get(curr_q["id"], "")
         is_passed = st.session_state.passed_status.get(curr_q["id"], False)
@@ -478,38 +540,61 @@ elif not st.session_state.quiz_finished:
         if is_passed:
             st.success("🎉 **정답입니다! 통과하셨습니다.**")
         else:
-            st.error(f"❌ **오답입니다. 개념 해설을 읽고 다시 시도하세요.** (내가 낸 답: {ans})")
+            st.error(f"❌ **오답입니다. 개념 해설을 읽고 다음으로 넘어가세요.** (내가 낸 답: {ans})")
         
-        st.info(f"💡 **교과서 원리 해설:**\n\n{curr_q['explanation']}")
+        st.markdown(f"""
+        <div class="explanation-box">
+            <b>💡 교과서 원리 해설:</b><br>{curr_q['explanation']}
+        </div>
+        """, unsafe_allow_html=True)
 
-    st.divider()
-
-    # 정답을 맞춘 경우(Pass)에만 '다음 문제로 이동' 버튼 활성화
-    if st.session_state.passed_status.get(curr_q["id"], False):
+        st.write("")
         if curr_idx < total_q - 1:
             if st.button("➡️ 다음 문제로 이동", use_container_width=True):
                 st.session_state.current_index += 1
                 st.rerun()
         else:
-            if st.button("🏁 모든 문제 통과! 최종 평가 완료하기", use_container_width=True):
+            if st.button("🏁 모든 문제 제출! 최종 평가 완료하기", use_container_width=True):
                 st.session_state.quiz_finished = True
                 st.rerun()
-    else:
-        st.caption("🔒 **정답을 맞혀야 다음 문제로 이동할 수 있습니다.**")
 
-# 4. 최종 완료 화면
+# -----------------------------------------------------------------------------
+# 4. 최종 완료 및 결과 화면 (오답노트 지원)
+# -----------------------------------------------------------------------------
 else:
-    st.markdown(f"""
-    <div class="quiz-card" style="text-align: center; padding: 40px 20px;">
-        <h2>📊 {st.session_state.student_name} 학생, 축하합니다!</h2>
-        <p style="font-size: 1.2rem; color: #636e72;">모든 영역의 표준 발음 평가를 성공적으로 마쳤습니다.</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.balloons()
-    st.success("🎉 모든 문항 통과 완료! 퀴즈를 푼 내용을 바탕으로 바탕 다지기를 다시 채워보세요.")
+    wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.passed_status.get(q["id"], False)]
+    total_count = len(st.session_state.quiz_list)
+    correct_count = total_count - len(wrong_q_list)
 
-    if st.button("🔄 처음부터 다시 풀기", use_container_width=True):
+    if len(wrong_q_list) == 0:
+        st.balloons()
+        st.markdown(f"""
+        <div class="quiz-card" style="text-align: center; padding: 35px 20px;">
+            <h2 style="color: #10B981;">📊 {st.session_state.student_name} 학생, PERFECT!</h2>
+            <p style="font-size: 1.15rem; color: #4B5563;">모든 문항을 완벽하게 맞혔습니다!</p>
+        </div>
+        """, unsafe_allow_html=True)
+        st.success("🎉 모든 문항 통과 완료! 퀴즈를 푼 내용을 바탕으로 바탕 다지기를 다시 채워보세요.")
+    else:
+        st.markdown(f"""
+        <div class="quiz-card" style="text-align: center; padding: 30px 20px;">
+            <h2 style="color: #4F46E5; margin-bottom: 8px;">📊 {st.session_state.student_name} 학생의 평가 결과</h2>
+            <h3 style="color: #1F2937; font-size: 1.7rem; margin-top: 5px;">{total_count}문제 중 <span style="color:#10B981;">{correct_count}개</span> 맞힘</h3>
+            <p style="color: #6B7280; font-size: 1rem; margin-top: 8px;">틀린 문제({len(wrong_q_list)}개)가 있습니다. 아래 오답노트로 복습해보세요!</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        if st.button("🔥 틀린 문제만 오답노트로 다시 풀기", use_container_width=True):
+            st.session_state.quiz_list = wrong_q_list.copy()
+            st.session_state.current_index = 0
+            st.session_state.user_answers = {}
+            st.session_state.passed_status = {}
+            st.session_state.checked_status = {}
+            st.session_state.quiz_finished = False
+            st.rerun()
+
+    st.write("")
+    if st.button("🔄 처음부터 전체 문제 다시 풀기", use_container_width=True):
         for key in list(st.session_state.keys()):
             del st.session_state[key]
         st.rerun()
