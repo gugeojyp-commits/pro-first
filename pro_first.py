@@ -1,6 +1,6 @@
 import streamlit as st
 
-# 페이지 기본 설정
+# ⚠️ [필수] st.set_page_config는 import 직후 가장 첫 번째 Streamlit 명령어로 실행되어야 합니다.
 st.set_page_config(
     page_title="국어 표준 발음과 받침의 발음 형성 평가",
     page_layout="centered"
@@ -170,7 +170,7 @@ with st.container():
 
 st.divider()
 
-# 폼 생성 (학생이 답을 모두 작성한 후 '최종 제출' 버튼을 누르도록 함)
+# 폼 생성
 with st.form("quiz_form"):
     user_answers = {}
     
@@ -203,13 +203,11 @@ if submitted:
         
         st.header(f"📊 {student_name} 학생의 평가 결과")
         
-        # 문항별 채점 및 해설 출력
         for item in quiz_data:
             q_id = item["id"]
             user_ans = user_answers.get(q_id)
             correct_ans = item["answer"]
             
-            # 단답형 공백 제거 및 비교
             is_correct = False
             if user_ans:
                 if item["type"] == "short":
@@ -225,12 +223,10 @@ if submitted:
                 st.write(f"- **제출한 답:** {user_ans if user_ans else '미입력'}")
                 st.write(f"- **바른 정답:** {correct_ans}")
             
-            # 상세 해설 안내 box
             with st.expander("💡 교과서 개념 해설 보기"):
                 st.info(item["explanation"])
             st.write("")
         
-        # 총점 표시
         final_score = int((score / total) * 100)
         st.metric(label="최종 점수", value=f"{final_score}점 / 100점", delta=f"{score}개 맞춤 ({total}문항 중)")
         
