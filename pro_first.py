@@ -385,7 +385,7 @@ if not st.session_state.user_info_submitted:
     """, unsafe_allow_html=True)
     
     with st.container():
-        s_id = st.text_input("학번을 입력하세요 (예: 10101)", key="input_s_id")
+        s_id = st.text_input("학번을 입력하세요 (예: 20101)", key="input_s_id")
         s_name = st.text_input("이름을 입력하세요", key="input_s_name")
         
         st.write("")
