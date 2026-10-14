@@ -163,12 +163,19 @@ RAW_QUIZ_DATA = {
     ]
 }
 
-# 세션 상태 초기화 (학생 접속 시 영역 내부 문제 순서 무작위 셔플)
+# 1. 세션 변수 안전 초기화
+if "student_id" not in st.session_state:
+    st.session_state.student_id = ""
+if "student_name" not in st.session_state:
+    st.session_state.student_name = ""
+if "user_info_submitted" not in st.session_state:
+    st.session_state.user_info_submitted = False
+
 if "quiz_list" not in st.session_state:
     shuffled_list = []
     for category_name, items in RAW_QUIZ_DATA.items():
         category_items = items.copy()
-        random.shuffle(category_items)  # 영역 내부 순서 무작위 섞기
+        random.shuffle(category_items)  # 영역 내부 순서만 무작위 섞기
         for item in category_items:
             item_copy = item.copy()
             item_copy["category"] = category_name
@@ -177,49 +184,47 @@ if "quiz_list" not in st.session_state:
     st.session_state.quiz_list = shuffled_list
     st.session_state.current_index = 0
     st.session_state.user_answers = {}
-    st.session_state.checked_status = {}  # 문제별 정답 확인 여부
+    st.session_state.checked_status = {}
     st.session_state.quiz_finished = False
 
 st.title("✏️ [국어] 표준 발음과 받침의 발음 형성 평가")
 
-# 1. 정보 입력 단계 (시작 화면)
-if "user_info_submitted" not in st.session_state:
+# 2. 정보 입력 단계 (시작 화면)
+if not st.session_state.user_info_submitted:
     st.subheader("👤 학생 정보를 입력하고 평가를 시작하세요.")
-    with st.form("info_form"):
-        s_id = st.text_input("학번 (예: 10101)")
-        s_name = st.text_input("이름")
-        start_btn = st.form_submit_button("🚀 평가 시작하기")
-        
-        if start_btn:
-            if s_id.strip() and s_name.strip():
-                st.session_state.student_id = s_id.strip()
-                st.session_state.student_name = s_name.strip()
-                st.session_state.user_info_submitted = True
-                st.rerun()
-            else:
-                st.warning("⚠️ 학번과 이름을 입력해 주세요!")
+    
+    s_id = st.text_input("학번 (예: 10101)", key="input_s_id")
+    s_name = st.text_input("이름", key="input_s_name")
+    
+    if st.button("🚀 평가 시작하기", use_container_width=True):
+        if s_id.strip() and s_name.strip():
+            st.session_state.student_id = s_id.strip()
+            st.session_state.student_name = s_name.strip()
+            st.session_state.user_info_submitted = True
+            st.rerun()
+        else:
+            st.warning("⚠️ 학번과 이름을 모두 입력해 주세요!")
 
-# 2. 문제 풀이 단계 (1문제씩 진행)
+# 3. 문제 풀이 단계 (1문제씩 진행 + 즉시 해설)
 elif not st.session_state.quiz_finished:
     quiz_list = st.session_state.quiz_list
     total_q = len(quiz_list)
     curr_idx = st.session_state.current_index
     curr_q = quiz_list[curr_idx]
 
-    # 상단 정보 및 진행률
+    # 상단 학생 정보 및 진행 상황
     st.caption(f"학생: {st.session_state.student_name} ({st.session_state.student_id})")
-    progress_val = (curr_idx + 1) / total_q
-    st.progress(progress_val)
+    st.progress((curr_idx + 1) / total_q)
     st.write(f"**진행 상황: {curr_idx + 1} / {total_q} 문항**")
     
-    # 큰 영역 제목 표시
+    # 영역 및 문제 안내
     st.markdown(f"### 📌 {curr_q['category']}")
     st.markdown(f"#### Q{curr_idx + 1}. {curr_q['question']}")
 
-    # 이전 입력값 불러오기
+    # 기존 답안 복원
     saved_ans = st.session_state.user_answers.get(curr_q["id"], "")
     
-    # 풀이 입력 양식
+    # 문제 양식
     if curr_q["type"] == "short":
         user_input = st.text_input("정답 입력:", value=saved_ans, key=f"q_input_{curr_q['id']}")
     else:
@@ -227,36 +232,37 @@ elif not st.session_state.quiz_finished:
         default_idx = opts.index(saved_ans) if saved_ans in opts else None
         user_input = st.radio("알맞은 답 선택:", opts, index=default_idx, key=f"q_input_{curr_q['id']}")
 
-    # 1문항 정답 바로 확인 버튼
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}"):
-            if user_input:
-                st.session_state.user_answers[curr_q["id"]] = user_input
-                st.session_state.checked_status[curr_q["id"]] = True
-            else:
-                st.warning("⚠️ 먼저 답을 입력거나 선택해 주세요.")
+    # 답안 세션 실시간 기록
+    if user_input:
+        st.session_state.user_answers[curr_q["id"]] = user_input
 
-    # 정답 확인이 눌렸을 경우 해설 바로 출력
+    st.write("")
+    
+    # 정답 확인 버튼
+    if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}"):
+        if user_input:
+            st.session_state.checked_status[curr_q["id"]] = True
+        else:
+            st.warning("⚠️ 먼저 정답을 입력하거나 선택해 주세요.")
+
+    # 해설 출력
     if st.session_state.checked_status.get(curr_q["id"], False):
         ans = st.session_state.user_answers.get(curr_q["id"], "")
         correct = curr_q["answer"]
         
-        # 정답 채점 (단답형 공백 제거 처리)
         is_correct = (ans.replace(" ", "") == correct.replace(" ", "")) if curr_q["type"] == "short" else (ans == correct)
         
         if is_correct:
             st.success("🎉 **정답입니다!**")
         else:
-            st.error(f"❌ **오답입니다.** (제출한 답: {ans})")
+            st.error(f"❌ **오답입니다.** (내가 낸 답: {ans if ans else '미입력'})")
             st.write(f"👉 **바른 정답:** {correct}")
         
-        # 해설 상자 바로 나타남
         st.info(f"💡 **교과서 원리 해설:**\n\n{curr_q['explanation']}")
 
     st.divider()
 
-    # 다음/이전 문제 이동 버튼
+    # 이전 / 다음 이동 버튼
     btn_col1, btn_col2 = st.columns([1, 1])
     with btn_col1:
         if curr_idx > 0:
@@ -274,7 +280,7 @@ elif not st.session_state.quiz_finished:
                 st.session_state.quiz_finished = True
                 st.rerun()
 
-# 3. 최종 완료 화면 (결과 요약)
+# 4. 최종 완료 화면
 else:
     st.header(f"📊 {st.session_state.student_name} 학생의 최종 결과")
     quiz_list = st.session_state.quiz_list
@@ -293,9 +299,9 @@ else:
     
     if final_score >= 80:
         st.balloons()
-        st.success("🎉 수고하셨습니다! 개념을 잘 이해하고 완벽하게 응용했습니다.")
+        st.success("🎉 수고하셨습니다! 개념을 완벽하게 이해했습니다.")
     else:
-        st.warning("📖 수고하셨습니다! 틀렸던 문제의 교과서 해설을 다시 한번 숙지해 보세요.")
+        st.warning("📖 수고하셨습니다! 틀렸던 문제의 교과서 해설을 다시 한번 복습해 보세요.")
 
     if st.button("🔄 다시 풀기"):
         for key in list(st.session_state.keys()):
