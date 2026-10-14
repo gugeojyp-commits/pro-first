@@ -380,7 +380,7 @@ st.markdown("<h1>✏️ [국어] 표준 발음과 받침 형성 평가</h1>", un
 if not st.session_state.user_info_submitted:
     st.markdown("""
     <div class="quiz-card">
-        <h3 style="text-align: center; margin-bottom: 20px;">👤 학생 정보 입력</h3>
+        <h3 style="text-align: center; margin-bottom: 20px;">👤 감일고 2학년 학생 정보 입력</h3>
     </div>
     """, unsafe_allow_html=True)
     
@@ -389,7 +389,7 @@ if not st.session_state.user_info_submitted:
         s_name = st.text_input("이름을 입력하세요", key="input_s_name")
         
         st.write("")
-        if st.button("🚀 평가 시작하기", use_container_width=True):
+        if st.button("🚀 1단계 평가 시작하기", use_container_width=True):
             if s_id.strip() and s_name.strip():
                 st.session_state.student_id = s_id.strip()
                 st.session_state.student_name = s_name.strip()
@@ -507,7 +507,7 @@ else:
     """, unsafe_allow_html=True)
     
     st.balloons()
-    st.success("🎉 모든 문항 통과 완료! 개념을 확실히 이해하셨네요.")
+    st.success("🎉 모든 문항 통과 완료! 퀴즈를 푼 내용을 바탕으로 바탕 다지기를 다시 채워보세요.")
 
     if st.button("🔄 처음부터 다시 풀기", use_container_width=True):
         for key in list(st.session_state.keys()):
