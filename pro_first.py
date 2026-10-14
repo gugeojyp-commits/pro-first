@@ -15,7 +15,6 @@ custom_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&family=Jua&display=swap');
 
-/* 전체 배경 및 기본 폰트 설정 */
 html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
     font-family: 'Pretendard', 'Jua', sans-serif !important;
 }
@@ -24,7 +23,6 @@ html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-/* 헤더 타이틀 */
 .main-title {
     background: linear-gradient(135deg, #4F46E5, #7C3AED);
     -webkit-background-clip: text;
@@ -36,7 +34,6 @@ html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
     letter-spacing: -0.5px;
 }
 
-/* 입체감 있는 메인 카드 */
 .quiz-card {
     background: #ffffff;
     padding: 28px;
@@ -59,7 +56,6 @@ html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
     background: linear-gradient(90deg, #6366F1, #8B5CF6);
 }
 
-/* 영역 안내 태그 */
 .category-badge {
     display: inline-block;
     background: #EEF2FF;
@@ -71,7 +67,6 @@ html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
     margin-bottom: 12px;
 }
 
-/* 문제 질문 스타일 */
 .question-text {
     font-size: 1.25rem;
     font-weight: 700;
@@ -80,7 +75,6 @@ html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
     margin-top: 8px;
 }
 
-/* 입력창 커스텀 */
 .stTextInput > div > div > input {
     border-radius: 16px !important;
     border: 2px solid #E5E7EB !important;
@@ -96,7 +90,6 @@ html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15) !important;
 }
 
-/* 객관식 보기 선택지 커스텀 */
 div[role="radiogroup"] {
     background-color: transparent;
     gap: 10px;
@@ -119,7 +112,6 @@ div[role="radiogroup"] > label:hover {
     transform: translateY(-1px);
 }
 
-/* 버튼 디자인 */
 .stButton > button {
     border-radius: 18px !important;
     font-size: 1.1rem !important;
@@ -137,13 +129,11 @@ div[role="radiogroup"] > label:hover {
     box-shadow: 0 8px 25px rgba(79, 70, 229, 0.45) !important;
 }
 
-/* 프로그레스바 */
 .stProgress > div > div > div > div {
     background: linear-gradient(90deg, #10B981, #3B82F6) !important;
     border-radius: 10px;
 }
 
-/* 해설 박스 */
 .explanation-box {
     background: #F0F9FF;
     border-left: 5px solid #0EA5E9;
@@ -166,8 +156,8 @@ RAW_QUIZ_DATA = {
         {
             "id": 1,
             "type": "short",
-            "question": "사람마다 발음하는 법이 달라서 [     ]에 지장이 생기는 것을 막기 위해 발음의 표준을 정해 놓은 것을 '표준 발음'이라고 합니다. 빈칸에 들어갈 알맞은 단어를 쓰시오.",
-            "answer": ["의사소통", "의사 소통"],
+            "question": "사람마다 발음하는 법이 달라서 [     ]에 지장이 생기는 것을 막기 위해 발음의 표준을 정해 놓은 것을 '표준 발음'이라고 합니다. 빈칸에 들어갈 알맞은 단어를 쓰시오. (띄어쓰기 없이 작성할 것)",
+            "answer": "의사소통",
             "explanation": "표준 발음은 국어를 쓰는 사람들 사이에서 발음이 달라 의사소통에 지장이 생기는 것을 막기 위해 정한 약속입니다."
         },
         {
@@ -191,24 +181,24 @@ RAW_QUIZ_DATA = {
         {
             "id": 101,
             "type": "choice",
-            "question": "자음을 첫소리로 가지고 있는 음절의 'ㅢ'는 어떻게 발음하는 것이 원칙인가요? (예: 희망, 무늬)",
+            "question": "자음을 첫소리로 가지고 있는 음절의 'ㅢ'는 어떻게 발음하는 것이 원칙인가요? (희망, 무늬)",
             "options": [
                 "1. [ㅢ]로만 발음해야 한다.",
                 "2. [ㅣ]로 발음한다."
             ],
             "answer": "2. [ㅣ]로 발음한다.",
-            "explanation": "자음을 첫소리로 가지고 있는 음절의 'ㅢ'는 [ㅣ]로 발음합니다. (예: 희망[히망], 무늬[무니])"
+            "explanation": "자음을 첫소리로 가지고 있는 음절의 'ㅢ'는 [ㅣ]로 발음합니다. (희망[히망], 무늬[무니])"
         },
         {
             "id": 102,
             "type": "choice",
-            "question": "단어의 첫음절 이외의 'ㅢ' 발음 규정으로 올바른 것은? (예: 주의, 협의)",
+            "question": "단어의 첫음절 이외의 'ㅢ' 발음 규정으로 올바른 것은? (주의, 협의)",
             "options": [
                 "1. 원칙적으로 [ㅢ]로 발음하되, [ㅣ]로 발음함도 허용한다.",
                 "2. 원칙적으로 [ㅣ]로 발음하되, [ㅢ]로 발음함도 허용한다."
             ],
             "answer": "1. 원칙적으로 [ㅢ]로 발음하되, [ㅣ]로 발음함도 허용한다.",
-            "explanation": "첫음절 이외의 'ㅢ'는 원칙적으로 [ㅢ]로 발음하지만 현실 발음을 고려하여 [ㅣ]로 발음하는 것도 허용합니다. (예: 주의[주의/주이])"
+            "explanation": "첫음절 이외의 'ㅢ'는 원칙적으로 [ㅢ]로 발음하지만 현실 발음을 고려하여 [ㅣ]로 발음하는 것도 허용합니다. (주의[주의/주이])"
         },
         {
             "id": 103,
@@ -252,7 +242,7 @@ RAW_QUIZ_DATA = {
             "id": 104,
             "type": "short",
             "question": "단어 '낮', '낯', '낱'의 실제 발음을 순서대로 적으시오.",
-            "answer": ["낟,낟,낟", "낟, 낟, 낟", "'낟', '낟', '낟'", "'낟','낟','낟'"], 
+            "answer": ["낟,낟,낟", "낟, 낟, 낟"], 
             "explanation": "'낮', '낯', '낱'은 모두 어말에서 음절의 끝소리 규칙이 적용되어 대표음 [ㄷ]으로 동일하게 발음됩니다. [낟], [낟], [낟]"
         },
         {
@@ -316,6 +306,13 @@ RAW_QUIZ_DATA = {
             "explanation": "겹받침이 어말이나 자음 앞에서 하나만 발음되고 하나는 탈락하는 현상을 '자음군 단순화'라고 합니다."
         },
         {
+            "id": 112,
+            "type": "short",
+            "question": "우리 국어 선생님은 늘 시조를 한 수 읊고 시작하십니다. '읊고'의 올바른 표준 발음을 쓰시오.",
+            "answer": "읍꼬",
+            "explanation": "겹받침 'ㄿ'은 어말이나 자음 앞에서 대표음 [ㅂ]으로 발음되므로 '읊고'는 [읍꼬]가 맞습니다. (예: 읊다[읍따], 읊고[읍꼬])"
+        },
+        {
             "id": 106,
             "type": "short",
             "question": "'닭이'의 올바른 표준 발음을 쓰시오.",
@@ -332,14 +329,14 @@ RAW_QUIZ_DATA = {
         {
             "id": 108,
             "type": "short",
-            "question": "'읽다'의 올바른 표준 발음을 순서대로 적으시오.",
-            "answer": "익따",
-            "explanation": "'읽다'의 겹받침 'ㄺ'은 자음 앞에서 [ㄱ]으로 발음되어 [익따]가 됩니다."
+            "question": "'읽다'와 '읽고'의 올바른 표준 발음을 순서대로 적으시오.",
+            "answer": ["익따, 일꼬", "익따,일꼬", "'익따', '일꼬'", "'익따','일꼬'"],
+            "explanation": "'읽다'의 겹받침 'ㄺ'은 자음 앞에서 [ㄱ]으로 발음되어 [익따]가 되고, '읽고'처럼 뒤에 'ㄱ'으로 시작하는 어미가 오면 [ㄹ]로 발음되어 [일꼬]가 됩니다."
         },
         {
             "id": 109,
             "type": "short",
-            "question": "'닳아'의 올바른 표준 발음을 쓰시오. (예: 달아)",
+            "question": "'닳아'의 올바른 표준 발음을 쓰시오.",
             "answer": "달아",
             "explanation": "겹받침 'ㅀ' 뒤에 모음으로 시작하는 형식 형태소(어미 '-아')가 오면 'ㅎ'이 탈락하여 [달아]로 발음됩니다."
         },
@@ -409,7 +406,7 @@ RAW_QUIZ_DATA = {
 }
 
 # -----------------------------------------------------------------------------
-# 1. 초기 퀴즈 데이터 세팅 함수
+# 1. 초기 퀴즈 데이터 세팅 및 변수 관리
 # -----------------------------------------------------------------------------
 def reset_full_quiz():
     shuffled_list = []
@@ -426,9 +423,9 @@ def reset_full_quiz():
     st.session_state.user_answers = {}
     st.session_state.passed_status = {}
     st.session_state.checked_status = {}
+    st.session_state.first_attempt_status = {}  # 최초 시도 정/오답 기록용
     st.session_state.quiz_finished = False
 
-# 세션 초기화
 if "student_id" not in st.session_state:
     st.session_state.student_id = ""
 if "student_name" not in st.session_state:
@@ -439,7 +436,6 @@ if "user_info_submitted" not in st.session_state:
 if "quiz_list" not in st.session_state:
     reset_full_quiz()
 
-# 메인 타이틀
 st.markdown('<div class="main-title">✏️ [국어] 표준 발음과 받침 형성 평가</div>', unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
@@ -449,7 +445,7 @@ if not st.session_state.user_info_submitted:
     st.markdown("""
     <div class="quiz-card" style="text-align: center;">
         <h3 style="color: #4F46E5; margin-bottom: 8px;">👤 감일고 2학년 학생 정보 입력</h3>
-        <p style="color: #6B7280; font-size: 0.95rem;">학번과 이름을 입력하고 평가를 시작하세요.</p>
+        <p style="color: #6B7280; font-size: 0.95rem;">학번과 이름을 정확히 입력하고 시작하세요.</p>
     </div>
     """, unsafe_allow_html=True)
     
@@ -458,7 +454,7 @@ if not st.session_state.user_info_submitted:
         s_name = st.text_input("이름을 입력하세요", key="input_s_name")
         
         st.write("")
-        if st.button("🚀 1단계 평가 시작하기", use_container_width=True):
+        if st.button("🚀 평가 시작하기", use_container_width=True):
             if s_id.strip() and s_name.strip():
                 st.session_state.student_id = s_id.strip()
                 st.session_state.student_name = s_name.strip()
@@ -476,7 +472,6 @@ elif not st.session_state.quiz_finished:
     curr_idx = st.session_state.current_index
     curr_q = quiz_list[curr_idx]
 
-    # 상단 학생 정보 및 프로그레스바
     col_info, col_prog = st.columns([1, 1])
     with col_info:
         st.markdown(f"👤 **학생:** {st.session_state.student_name} ({st.session_state.student_id})")
@@ -486,7 +481,6 @@ elif not st.session_state.quiz_finished:
     st.progress((curr_idx + 1) / total_q)
     st.write("")
 
-    # 카드 디자인 속 문제 배치
     st.markdown(f"""
     <div class="quiz-card">
         <div class="category-badge">📌 {curr_q['category']}</div>
@@ -494,7 +488,6 @@ elif not st.session_state.quiz_finished:
     </div>
     """, unsafe_allow_html=True)
 
-    # 이전 답안 복원
     saved_ans = st.session_state.user_answers.get(curr_q["id"], "")
     
     if curr_q["type"] == "short":
@@ -506,20 +499,18 @@ elif not st.session_state.quiz_finished:
 
     st.write("")
     
-    # 정답 검증 함수
     def clean_text(text):
         if isinstance(text, list):
             return [t.replace(" ", "").replace("[", "").replace("]", "") for t in text]
         return text.replace(" ", "").replace("[", "").replace("]", "")
 
-    # 정답 제출 및 확인
+    # 정답 제출 및 검증
     if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}", use_container_width=True):
         if user_input:
             st.session_state.user_answers[curr_q["id"]] = user_input
             st.session_state.checked_status[curr_q["id"]] = True
             
             correct = curr_q["answer"]
-            
             if curr_q["type"] == "short":
                 cleaned_user = clean_text(user_input)
                 cleaned_correct = clean_text(correct)
@@ -527,12 +518,16 @@ elif not st.session_state.quiz_finished:
             else:
                 is_correct = (user_input == correct)
             
+            # 최초 시도 정/오답 기록 (오답노트 기준)
+            if curr_q["id"] not in st.session_state.first_attempt_status:
+                st.session_state.first_attempt_status[curr_q["id"]] = is_correct
+
             st.session_state.passed_status[curr_q["id"]] = is_correct
             st.rerun()
         else:
             st.warning("⚠️ 먼저 정답을 입력하거나 선택해 주세요.")
 
-    # 제출 후 해설 및 결과 표시
+    # 해설 및 넘어가기
     if st.session_state.checked_status.get(curr_q["id"], False):
         ans = st.session_state.user_answers.get(curr_q["id"], "")
         is_passed = st.session_state.passed_status.get(curr_q["id"], False)
@@ -540,7 +535,7 @@ elif not st.session_state.quiz_finished:
         if is_passed:
             st.success("🎉 **정답입니다! 통과하셨습니다.**")
         else:
-            st.error(f"❌ **오답입니다. 개념 해설을 읽고 다음으로 넘어가세요.** (내가 낸 답: {ans})")
+            st.error(f"❌ **오답입니다. 해설을 확인하고 정답을 맞춰 다음으로 이동하세요.** (내가 낸 답: {ans})")
         
         st.markdown(f"""
         <div class="explanation-box">
@@ -549,52 +544,69 @@ elif not st.session_state.quiz_finished:
         """, unsafe_allow_html=True)
 
         st.write("")
-        if curr_idx < total_q - 1:
-            if st.button("➡️ 다음 문제로 이동", use_container_width=True):
-                st.session_state.current_index += 1
-                st.rerun()
+        # 통과(정답)해야만 이동 버튼 활성화
+        if st.session_state.passed_status.get(curr_q["id"], False):
+            if curr_idx < total_q - 1:
+                if st.button("➡️ 다음 문제로 이동", use_container_width=True):
+                    st.session_state.current_index += 1
+                    st.rerun()
+            else:
+                if st.button("🏁 모든 문제 완료! 최종 결과 화면으로", use_container_width=True):
+                    st.session_state.quiz_finished = True
+                    st.rerun()
         else:
-            if st.button("🏁 모든 문제 제출! 최종 평가 완료하기", use_container_width=True):
-                st.session_state.quiz_finished = True
-                st.rerun()
+            st.caption("🔒 **정답을 맞혀야 다음 문제로 넘어갈 수 있습니다.**")
 
 # -----------------------------------------------------------------------------
-# 4. 최종 완료 및 결과 화면 (오답노트 지원)
+# 4. 최종 완료 화면 (구글 폼 제출 우선 + 오답 노트)
 # -----------------------------------------------------------------------------
 else:
-    wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.passed_status.get(q["id"], False)]
+    # 최초 1회 시도 시 오답이었던 문제 목록 추출
+    wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.first_attempt_status.get(q["id"], False)]
     total_count = len(st.session_state.quiz_list)
     correct_count = total_count - len(wrong_q_list)
 
-    if len(wrong_q_list) == 0:
-        st.balloons()
-        st.markdown(f"""
-        <div class="quiz-card" style="text-align: center; padding: 35px 20px;">
-            <h2 style="color: #10B981;">📊 {st.session_state.student_name} 학생, PERFECT!</h2>
-            <p style="font-size: 1.15rem; color: #4B5563;">모든 문항을 완벽하게 맞혔습니다!</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.success("🎉 모든 문항 통과 완료! 퀴즈를 푼 내용을 바탕으로 바탕 다지기를 다시 채워보세요.")
-    else:
-        st.markdown(f"""
-        <div class="quiz-card" style="text-align: center; padding: 30px 20px;">
-            <h2 style="color: #4F46E5; margin-bottom: 8px;">📊 {st.session_state.student_name} 학생의 평가 결과</h2>
-            <h3 style="color: #1F2937; font-size: 1.7rem; margin-top: 5px;">{total_count}문제 중 <span style="color:#10B981;">{correct_count}개</span> 맞힘</h3>
-            <p style="color: #6B7280; font-size: 1rem; margin-top: 8px;">틀린 문제({len(wrong_q_list)}개)가 있습니다. 아래 오답노트로 복습해보세요!</p>
-        </div>
-        """, unsafe_allow_html=True)
+    st.balloons()
+    st.markdown(f"""
+    <div class="quiz-card" style="text-align: center; padding: 30px 20px;">
+        <h2 style="color: #4F46E5; margin-bottom: 8px;">🎉 {st.session_state.student_name} 학생, 모든 평가 완료!</h2>
+        <h3 style="color: #1F2937; font-size: 1.6rem; margin-top: 5px;">
+            첫 시도 정답: {total_count}문항 중 <span style="color:#10B981;">{correct_count}개</span>
+        </h3>
+        <p style="color: #6B7280; font-size: 0.95rem; margin-top: 8px;">
+            퀴즈를 바탕으로 학습지를 정돈하고, <b>아래 구글 폼으로 반드시 먼저 제출</b>해주세요!
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
-        if st.button("🔥 틀린 문제만 오답노트로 다시 풀기", use_container_width=True):
+    # 🔗 [필수] 선생님의 구글 폼 URL을 여기에 넣어주세요!
+    google_form_url = "https://docs.google.com/forms"
+
+    st.markdown("### 1️⃣ 구글 폼 제출하기 (필수)")
+    st.link_button("📝 선생님에게 완수 확인 제출하기 (클릭)", google_form_url, use_container_width=True)
+
+    st.divider()
+
+    st.markdown("### 2️⃣ 오답노트 및 복습하기")
+    if len(wrong_q_list) > 0:
+        st.warning(f"⚠️ 처음 시도에서 틀렸던 문제가 {len(wrong_q_list)}개 있습니다.")
+        if st.button("🔥 처음 틀렸던 문제만 오답노트로 다시 풀기", use_container_width=True):
             st.session_state.quiz_list = wrong_q_list.copy()
             st.session_state.current_index = 0
             st.session_state.user_answers = {}
             st.session_state.passed_status = {}
             st.session_state.checked_status = {}
+            st.session_state.first_attempt_status = {}
             st.session_state.quiz_finished = False
             st.rerun()
+    else:
+        st.success("💯 첫 번째 시도에서 모든 문제를 완벽하게 맞춰 오답이 없습니다!")
 
     st.write("")
-    if st.button("🔄 처음부터 전체 문제 다시 풀기", use_container_width=True):
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.rerun()
+    st.write("")
+    # 실수 방지를 위해 가장 하단에 작게 배치
+    with st.expander("🔄 처음부터 전체 문제 다시 시작하기"):
+        if st.button("처음부터 새로 시작하기", use_container_width=True):
+            for key in list(st.session_state.keys()):
+                del st.session_state[key]
+            st.rerun()
