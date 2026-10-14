@@ -1,8 +1,9 @@
 import streamlit as st
 
+# 페이지 기본 설정 (최상단 호출)
 st.set_page_config(
-    page_title="국어 표준 발음과 받침의 발음 형성 평가",
-    page_layout="centered"
+    page_title="국어 표준 발음 평가",
+    layout="centered"
 )
 
 # 퀴즈 데이터 정의 (교과서 바탕다지기 및 본문 개념 기반)
@@ -159,13 +160,12 @@ quiz_data = [
 st.title("✏️ [국어] 표준 발음과 받침의 발음 형성 평가")
 st.caption("수업 내용을 바탕으로 크롬북을 활용해 답안을 제출해 주세요. (제출 후 해설 확인 가능)")
 
-# 학생 정보 입력 섹션
-with st.container():
-    col1, col2 = st.columns(2)
-    with col1:
-        student_id = st.text_input("학번 (예: 10101)", key="student_id")
-    with col2:
-        student_name = st.text_input("이름", key="student_name")
+# 학생 정보 입력
+col1, col2 = st.columns(2)
+with col1:
+    student_id = st.text_input("학번 (예: 10101)", key="student_id")
+with col2:
+    student_name = st.text_input("이름", key="student_name")
 
 st.divider()
 
@@ -192,7 +192,7 @@ with st.form("quiz_form"):
         
     submitted = st.form_submit_button("📝 형성 평가 제출하기", use_container_width=True)
 
-# 결과 제출 처리 및 자동 채점
+# 결과 제출 처리 및 채점
 if submitted:
     if not student_id or not student_name:
         st.warning("⚠️ 학번과 이름을 반드시 입력해 주세요!")
@@ -227,7 +227,9 @@ if submitted:
             st.write("")
         
         final_score = int((score / total) * 100)
-        st.metric(label="최종 점수", value=f"{final_score}점 / 100점", delta=f"{score}개 맞춤 ({total}문항 중)")
+        
+        # 오류 유발 요소를 제거한 안전한 점수 표시 방식
+        st.subheader(f"💯 최종 점수: {final_score}점 ({score} / {total} 문항 정답)")
         
         if final_score >= 80:
             st.balloons()
