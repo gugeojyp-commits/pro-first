@@ -1,6 +1,5 @@
 import streamlit as st
 
-# ⚠️ [필수] st.set_page_config는 import 직후 가장 첫 번째 Streamlit 명령어로 실행되어야 합니다.
 st.set_page_config(
     page_title="국어 표준 발음과 받침의 발음 형성 평가",
     page_layout="centered"
