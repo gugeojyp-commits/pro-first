@@ -1,4 +1,6 @@
 import random
+import requests
+import json
 import streamlit as st
 
 # 페이지 기본 설정
@@ -7,6 +9,11 @@ st.set_page_config(
     page_icon="✏️",
     layout="centered"
 )
+
+# -----------------------------------------------------------------------------
+# 🔗 [필수] 구글 시트 웹 앱 URL을 여기에 붙여넣으세요!
+# -----------------------------------------------------------------------------
+GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/여기에_복사한_배포_URL을_붙여넣으세요/exec"
 
 # -----------------------------------------------------------------------------
 # 🎨 트렌디하고 세련된 모던 카드 UI Style (CSS)
@@ -149,7 +156,7 @@ div[role="radiogroup"] > label:hover {
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 📚 원본 데이터 (영역/카테고리별)
+# 📚 원본 데이터
 # -----------------------------------------------------------------------------
 RAW_QUIZ_DATA = {
     "1. 표준 발음의 개념과 원칙": [
@@ -423,8 +430,9 @@ def reset_full_quiz():
     st.session_state.user_answers = {}
     st.session_state.passed_status = {}
     st.session_state.checked_status = {}
-    st.session_state.first_attempt_status = {}  # 최초 시도 정/오답 기록용
+    st.session_state.first_attempt_status = {}
     st.session_state.quiz_finished = False
+    st.session_state.sheet_submitted = False  # 구글 시트 중복 전송 방지 플래그
 
 if "student_id" not in st.session_state:
     st.session_state.student_id = ""
@@ -501,8 +509,8 @@ elif not st.session_state.quiz_finished:
     
     def clean_text(text):
         if isinstance(text, list):
-            return [t.replace(" ", "").replace("[", "").replace("]", "") for t in text]
-        return text.replace(" ", "").replace("[", "").replace("]", "")
+            return [t.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",") for t in text]
+        return text.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",")
 
     # 정답 제출 및 검증
     if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}", use_container_width=True):
@@ -518,7 +526,7 @@ elif not st.session_state.quiz_finished:
             else:
                 is_correct = (user_input == correct)
             
-            # 최초 시도 정/오답 기록 (오답노트 기준)
+            # 최초 시도 정/오답 기록
             if curr_q["id"] not in st.session_state.first_attempt_status:
                 st.session_state.first_attempt_status[curr_q["id"]] = is_correct
 
@@ -544,26 +552,48 @@ elif not st.session_state.quiz_finished:
         """, unsafe_allow_html=True)
 
         st.write("")
-        # 통과(정답)해야만 이동 버튼 활성화
         if st.session_state.passed_status.get(curr_q["id"], False):
             if curr_idx < total_q - 1:
                 if st.button("➡️ 다음 문제로 이동", use_container_width=True):
                     st.session_state.current_index += 1
                     st.rerun()
             else:
-                if st.button("🏁 모든 문제 완료! 최종 결과 화면으로", use_container_width=True):
+                if st.button("🏁 모든 문제 완료! 최종 결과 확인하기", use_container_width=True):
                     st.session_state.quiz_finished = True
                     st.rerun()
         else:
             st.caption("🔒 **정답을 맞혀야 다음 문제로 넘어갈 수 있습니다.**")
 
 # -----------------------------------------------------------------------------
-# 4. 최종 완료 화면 (구글 폼 제출 완료 체크박스 제어)
+# 4. 최종 완료 화면 및 구글 시트 자동 전송
 # -----------------------------------------------------------------------------
 else:
     wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.first_attempt_status.get(q["id"], False)]
     total_count = len(st.session_state.quiz_list)
     correct_count = total_count - len(wrong_q_list)
+    wrong_ids_str = ", ".join([str(q["id"]) for q in wrong_q_list]) if wrong_q_list else "없음"
+
+    # 📤 구글 스프레드시트 자동 전송 로직 (1회만 실행)
+    if not st.session_state.get("sheet_submitted", False):
+        payload = {
+            "student_id": st.session_state.student_id,
+            "student_name": st.session_state.student_name,
+            "score": correct_count,
+            "total": total_count,
+            "wrong_questions": wrong_ids_str
+        }
+        try:
+            res = requests.post(
+                GOOGLE_SHEET_WEBAPP_URL,
+                data=json.dumps(payload),
+                headers={"Content-Type": "application/json"},
+                timeout=5
+            )
+            if res.status_code == 200:
+                st.session_state.sheet_submitted = True
+        except Exception:
+            # 네트워크 오류 시 플래그를 세우지 않고 재시도 버튼 표시
+            pass
 
     st.balloons()
     st.markdown(f"""
@@ -573,45 +603,39 @@ else:
             첫 시도 정답: {total_count}문항 중 <span style="color:#10B981;">{correct_count}개</span>
         </h3>
         <p style="color: #6B7280; font-size: 0.95rem; margin-top: 8px;">
-            퀴즈를 바탕으로 학습지를 정돈하고, <b>아래 구글 폼으로 먼저 제출</b>해 주세요!
+            수고하셨습니다! 결과는 <b>선생님 시트에 자동 전송</b>되었습니다.
         </p>
     </div>
     """, unsafe_allow_html=True)
 
-    # 🔗 [필수] 선생님의 구글 폼 URL을 여기에 넣으세요!
-    google_form_url = "https://docs.google.com/forms"
-
-    st.markdown("### 1️⃣ 구글 폼 제출하기 (필수)")
-    st.link_button("📝 선생님에게 완수 확인 제출하기 (구글 폼 열기)", google_form_url, use_container_width=True)
-
-    st.write("")
-    # 🌟 구글 폼 제출 체크박스 추가
-    is_submitted_form = st.checkbox("✅ 위 버튼을 클릭하여 선생님에게 구글 폼 제출을 완료했습니다!")
+    # 시트 전송 상태 알림 피드백
+    if st.session_state.get("sheet_submitted", False):
+        st.success("✅ **선생님 평가 기록부에 성적이 정상적으로 자동 제출되었습니다.**")
+    else:
+        st.warning("⚠️ 자동 제출 통신이 지연되고 있습니다.")
+        if st.button("📤 결과 다시 제출하기"):
+            st.rerun()
 
     st.divider()
 
-    st.markdown("### 2️⃣ 오답노트 및 복습하기")
+    st.markdown("### 📖 오답노트 및 복습하기")
     if len(wrong_q_list) > 0:
-        st.warning(f"⚠️ 처음 시도에서 틀렸던 문제가 {len(wrong_q_list)}개 있습니다.")
+        st.warning(f"⚠️ 처음 시도에서 틀렸던 문제가 **{len(wrong_q_list)}개** 있습니다.")
         
-        # 🔒 구글 폼 제출 체크박스가 체크되어야만 오답노트 버튼 활성화
-        if is_submitted_form:
-            if st.button("🔥 처음 틀렸던 문제만 오답노트로 다시 풀기", use_container_width=True):
-                st.session_state.quiz_list = wrong_q_list.copy()
-                st.session_state.current_index = 0
-                st.session_state.user_answers = {}
-                st.session_state.passed_status = {}
-                st.session_state.checked_status = {}
-                st.session_state.first_attempt_status = {}
-                st.session_state.quiz_finished = False
-                st.rerun()
-        else:
-            st.button("🔒 구글 폼 제출 완료 체크박스를 선택해야 오답노트가 열립니다", disabled=True, use_container_width=True)
-            st.caption("👆 위 **'구글 폼 제출을 완료했습니다!'** 체크박스에 체크해 주세요.")
+        if st.button("🔥 처음 틀렸던 문제만 다시 풀기", use_container_width=True):
+            st.session_state.quiz_list = wrong_q_list.copy()
+            st.session_state.current_index = 0
+            st.session_state.user_answers = {}
+            st.session_state.passed_status = {}
+            st.session_state.checked_status = {}
+            st.session_state.first_attempt_status = {}
+            st.session_state.quiz_finished = False
+            # 다시 풀 때는 시트에 중복 제출되지 않도록 완료 상태 유지
+            st.session_state.sheet_submitted = True
+            st.rerun()
     else:
         st.success("💯 첫 번째 시도에서 모든 문제를 완벽하게 맞춰 오답이 없습니다!")
 
-    st.write("")
     st.write("")
     with st.expander("🔄 처음부터 전체 문제 다시 시작하기"):
         if st.button("처음부터 새로 시작하기", use_container_width=True):
