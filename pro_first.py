@@ -460,7 +460,6 @@ else:
         except Exception:
             pass
 
-    st.balloons()
     st.header(f"🎉 {st.session_state.student_name or '선생님'} 님, 평가 완료!")
     st.subheader(f"첫 시도 정답: {total_count}문항 중 {correct_count}개")
     st.write("평가 결과는 **선생님 기록부에 자동 저장**되었습니다.")
