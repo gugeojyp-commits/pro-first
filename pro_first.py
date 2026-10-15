@@ -13,18 +13,19 @@ st.set_page_config(
 # -----------------------------------------------------------------------------
 # 🔗 [필수 설정] 구글 시트 배포 URL 및 선생님 비밀번호
 # -----------------------------------------------------------------------------
-GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbymuGKCOqviCjqn3PEab4ubtf_m5cf1Gj184kGTgFqm0nBrOSKX7_oc9V_Wjv73AbGTAA/exec"
-TEACHER_PASSWORD = "01063052122"  # 선생님 테스트용 비밀번호
+GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/여기에_복사한_배포_URL을_붙여넣으세요/exec"
+TEACHER_PASSWORD = "teacher777"  # 선생님 테스트용 비밀번호 (자유롭게 변경 가능)
 
 # -----------------------------------------------------------------------------
-# 🎨 UI 스타일 (CSS)
+# 🎨 UI 스타일 (CSS) - 아이콘 깨짐 및 글자 겹침 방지 패치 완료
 # -----------------------------------------------------------------------------
 custom_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&family=Jua&display=swap');
 
-html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
-    font-family: 'Pretendard', 'Jua', sans-serif !important;
+/* 아이콘 폰트 충돌 방지: 특정 텍스트 요소에만 한글 폰트 적용 */
+html, body, p, label, input, .question-text, .main-title, .category-badge, .explanation-box {
+    font-family: 'Pretendard', sans-serif !important;
 }
 
 .stApp {
@@ -44,7 +45,7 @@ html, body, [class*="css"], .stMarkdown, p, div, span, label, input, button {
 
 .quiz-card {
     background: #ffffff;
-    padding: 26px;
+    padding: 24px;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.8);
@@ -123,6 +124,12 @@ div[role="radiogroup"] > label {
     color: #0369A1;
     font-size: 0.95rem;
     line-height: 1.55;
+}
+
+/* expander 헤더 겹침 방지 */
+.streamlit-expanderHeader {
+    font-size: 1rem !important;
+    font-weight: 600 !important;
 }
 </style>
 """
@@ -465,7 +472,7 @@ RAW_QUIZ_DATA = {
     ]
 }
 
-# 텍스트 정제 헬퍼 함수
+# 텍스트 정제 헬퍼 함수 (공백, 기호 유연성 처리)
 def clean_text(text):
     if isinstance(text, list):
         return [t.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",") for t in text]
@@ -540,25 +547,27 @@ elif not st.session_state.quiz_finished:
     curr_idx = st.session_state.current_index
     curr_q = quiz_list[curr_idx]
 
-    col_info, col_admin, col_prog = st.columns([2, 1, 1.5])
+    # 상단 정보 바 (겹침 현상 완전 제거)
+    col_info, col_prog = st.columns([1, 1])
     with col_info:
         st.markdown(f"👤 **학생:** {st.session_state.student_name} ({st.session_state.student_id})")
+    with col_prog:
+        st.markdown(f"<p style='text-align: right; font-weight:700; color:#4B5563;'>진행: {curr_idx + 1} / {total_q}</p>", unsafe_allow_html=True)
     
-    # 🔑 [교사 전용 패스 기능] 1번 문제 우측 상단에 배치
-    with col_admin:
-        if curr_idx == 0:
-            with st.popover("🔒 교사확인"):
-                pw_input = st.text_input("비밀번호", type="password", key="admin_pw")
-                if st.button("마지막 화면으로 점프", key="jump_btn"):
+    # 🔑 [교사 전용 패스 기능] 1번 문제에서만 접이식으로 깔끔하게 제공
+    if curr_idx == 0:
+        with st.expander("🔒 교사용 테스트 점프 (비밀번호)", expanded=False):
+            c_pw, c_btn = st.columns([3, 1])
+            with c_pw:
+                pw_input = st.text_input("비밀번호", type="password", key="admin_pw", label_visibility="collapsed", placeholder="비밀번호 입력")
+            with c_btn:
+                if st.button("점프", key="jump_btn", use_container_width=True):
                     if pw_input == TEACHER_PASSWORD:
                         st.session_state.quiz_finished = True
                         st.rerun()
                     else:
                         st.error("비밀번호 불일치")
-                        
-    with col_prog:
-        st.markdown(f"<p style='text-align: right; font-weight:700; color:#4B5563;'>진행: {curr_idx + 1} / {total_q}</p>", unsafe_allow_html=True)
-    
+
     st.progress((curr_idx + 1) / total_q)
     st.write("")
 
@@ -580,7 +589,7 @@ elif not st.session_state.quiz_finished:
 
     st.write("")
 
-    # 정답 검증
+    # 정답 검증 버튼
     if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}", use_container_width=True):
         if user_input:
             st.session_state.user_answers[curr_q["id"]] = user_input
@@ -689,7 +698,7 @@ else:
                 st.session_state.checked_status = {}
                 st.session_state.first_attempt_status = {}
                 st.session_state.quiz_finished = False
-                st.session_state.sheet_submitted = True  # 재도전 시 시트 재전송 방지
+                st.session_state.sheet_submitted = True  # 재도전 시 시트 중복 전송 방지
                 st.rerun()
         else:
             st.success("💯 첫 번째 시도에서 모든 문제를 완벽하게 맞혔습니다!")
@@ -726,7 +735,7 @@ else:
                     st.radio("답안 연습:", q["options"], index=None, key=f"all_view_opt_{q['id']}", label_visibility="collapsed")
                 
                 # 정답 및 해설 토글창
-                with st.expander(f"👁️ Q{idx + 1} 정답 및 해설 열기"):
+                with st.expander(f"Q{idx + 1} 정답 및 해설 열기"):
                     ans_display = q['answer'] if isinstance(q['answer'], str) else q['answer'][0]
                     st.markdown(f"**정답:** `{ans_display}`")
                     st.markdown(f"""
