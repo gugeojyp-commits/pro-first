@@ -1,6 +1,7 @@
 import random
 import requests
 import json
+import threading
 import streamlit as st
 
 # 페이지 설정
@@ -11,9 +12,9 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
-# ⚠️ [필수] 이전 세션(40문항 및 깨진 CSS) 강제 박멸 루틴
+# ⚠️ 이전 세션 강제 초기화 루틴
 # -----------------------------------------------------------------------------
-APP_VERSION = "v30_clean_final"
+APP_VERSION = "v30_instant_jump"
 if st.session_state.get("app_version") != APP_VERSION:
     st.session_state.clear()
     st.session_state.app_version = APP_VERSION
@@ -21,8 +22,23 @@ if st.session_state.get("app_version") != APP_VERSION:
 # -----------------------------------------------------------------------------
 # 🔗 [설정] 구글 시트 배포 URL 및 교사용 테스트 비밀번호
 # -----------------------------------------------------------------------------
-GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/sAKfycbymuGKCOqviCjqn3PEab4ubtf_m5cf1Gj184kGTgFqm0nBrOSKX7_oc9V_Wjv73AbGTAA/exec"
+GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbymuGKCOqviCjqn3PEab4ubtf_m5cf1Gj184kGTgFqm0nBrOSKX7_oc9V_Wjv73AbGTAA/exec"
 TEACHER_PASSWORD = "01063052122"
+
+# 🚀 백그라운드 실시간 전송 함수 (화면 멈춤 완전 방지)
+def send_to_google_sheet_async(url, payload):
+    # 실제 URL이 입력되지 않았으면 통신 생략
+    if "여기에_배포_URL" in url or not url.startswith("https://script.google.com"):
+        return
+    try:
+        requests.post(
+            url,
+            data=json.dumps(payload),
+            headers={"Content-Type": "application/json"},
+            timeout=8
+        )
+    except Exception:
+        pass
 
 # -----------------------------------------------------------------------------
 # 📚 원본 퀴즈 데이터 (정확히 30문항 고정)
@@ -118,7 +134,7 @@ RAW_QUIZ_DATA = {
             "id": 104,
             "type": "short",
             "question": "단어 '낮', '낯', '낱'의 실제 발음을 순서대로 적으시오.",
-            "answer": ["낟,낟,낟", "낟, 낟, 낟", "낟", "낟낟낟"], 
+            "answer": ["낟,낟,낟", "낟, 낟, 낟"], 
             "explanation": "'낮', '낯', '낱'은 모두 어말에서 음절의 끝소리 규칙이 적용되어 대표음 [ㄷ]으로 동일하게 발음됩니다. [낟], [낟], [낟]"
         },
         {
@@ -213,7 +229,7 @@ RAW_QUIZ_DATA = {
             "id": 109,
             "type": "short",
             "question": "'닳아'의 올바른 표준 발음을 쓰시오.",
-            "answer": "다라",
+            "answer": "달아",
             "explanation": "겹받침 'ㅀ' 뒤에 모음으로 시작하는 형식 형태소(어미 '-아')가 오면 'ㅎ'이 탈락하여 [달아]로 발음됩니다."
         },
         {
@@ -287,7 +303,7 @@ def clean_text(text):
     return text.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",")
 
 # -----------------------------------------------------------------------------
-# 1. 초기 퀴즈 데이터 세팅
+# 1. 초기 퀴즈 세팅
 # -----------------------------------------------------------------------------
 def reset_full_quiz():
     shuffled_list = []
@@ -321,11 +337,11 @@ if "quiz_list" not in st.session_state or len(st.session_state.quiz_list) != 30:
 st.title("✏️ [국어] 표준 발음과 받침 형성 평가")
 
 # -----------------------------------------------------------------------------
-# 2. 학생 정보 입력 단계
+# 2. 학생 정보 입력 화면
 # -----------------------------------------------------------------------------
 if not st.session_state.user_info_submitted:
-    st.subheader("👤 감일고 학생 정보 입력")
-    st.write("학번과 이름을 입력하세요. (총 30문항)")
+    st.subheader("👤 학생 정보 입력")
+    st.write("학번과 이름을 입력하고 시작하세요. (총 30문항)")
     
     s_id = st.text_input("학번을 입력하세요 (예: 20101)", key="input_s_id")
     s_name = st.text_input("이름을 입력하세요", key="input_s_name")
@@ -340,7 +356,7 @@ if not st.session_state.user_info_submitted:
             st.warning("⚠️ 학번과 이름을 모두 입력해 주세요!")
 
 # -----------------------------------------------------------------------------
-# 3. 개별 문제 풀이 단계
+# 3. 개별 문제 풀이 화면
 # -----------------------------------------------------------------------------
 elif not st.session_state.quiz_finished:
     quiz_list = st.session_state.quiz_list
@@ -361,7 +377,7 @@ elif not st.session_state.quiz_finished:
     if curr_idx == 0:
         c1, c2 = st.columns([3, 1])
         with c1:
-            pw_input = st.text_input("교사 비밀번호", type="password", key="quick_admin_pw", label_visibility="collapsed", placeholder="교사 비밀번호 입력시 바로 결과 확인")
+            pw_input = st.text_input("확인", type="password", key="quick_admin_pw", label_visibility="collapsed", placeholder="교사 확인")
         with c2:
             if st.button("결과화면 점프", key="quick_jump_btn", use_container_width=True):
                 if pw_input == TEACHER_PASSWORD:
@@ -371,7 +387,6 @@ elif not st.session_state.quiz_finished:
                     st.error("비밀번호 불일치")
         st.write("---")
 
-    # 문제 카드 영역
     st.caption(f"📌 {curr_q['category']}")
     st.subheader(f"Q{curr_idx + 1}. {curr_q['question']}")
 
@@ -432,7 +447,7 @@ elif not st.session_state.quiz_finished:
             st.caption("🔒 **정답을 맞혀야 다음 문제로 넘어갈 수 있습니다.**")
 
 # -----------------------------------------------------------------------------
-# 4. 최종 완료 화면
+# 4. 최종 완료 화면 (비동기 백그라운드 전송으로 즉시 이동)
 # -----------------------------------------------------------------------------
 else:
     wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.first_attempt_status.get(q["id"], False)]
@@ -440,6 +455,7 @@ else:
     correct_count = total_count - len(wrong_q_list)
     wrong_ids_str = ", ".join([str(q["id"]) for q in wrong_q_list]) if wrong_q_list else "없음"
 
+    # 🚀 백그라운드 스레드로 비동기 전송 (화면 멈춤 완전 해소!)
     if st.session_state.student_id and not st.session_state.get("sheet_submitted", False):
         payload = {
             "student_id": st.session_state.student_id,
@@ -448,17 +464,13 @@ else:
             "total": total_count,
             "wrong_questions": wrong_ids_str
         }
-        try:
-            res = requests.post(
-                GOOGLE_SHEET_WEBAPP_URL,
-                data=json.dumps(payload),
-                headers={"Content-Type": "application/json"},
-                timeout=5
-            )
-            if res.status_code == 200:
-                st.session_state.sheet_submitted = True
-        except Exception:
-            pass
+        st.session_state.sheet_submitted = True
+        # 화면을 멈추지 않고 뒤에서 조용히 전송
+        threading.Thread(
+            target=send_to_google_sheet_async,
+            args=(GOOGLE_SHEET_WEBAPP_URL, payload),
+            daemon=True
+        ).start()
 
     st.header(f"🎉 {st.session_state.student_name or '선생님'} 님, 평가 완료!")
     st.subheader(f"첫 시도 정답: {total_count}문항 중 {correct_count}개")
