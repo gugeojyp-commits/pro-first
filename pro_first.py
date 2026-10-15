@@ -341,7 +341,7 @@ st.title("✏️ [국어] 표준 발음과 받침 형성 평가")
 # -----------------------------------------------------------------------------
 if not st.session_state.user_info_submitted:
     st.subheader("👤 학생 정보 입력")
-    st.write("학번과 이름을 입력하고 시작하세요. (총 30문항)")
+    st.write("학번과 이름을 입력하고 시작하세요. 모든 내용은 선생님 기록부에 자동 저장됩니다.(총 30문항)")
     
     s_id = st.text_input("학번을 입력하세요 (예: 20101)", key="input_s_id")
     s_name = st.text_input("이름을 입력하세요", key="input_s_name")
@@ -379,7 +379,7 @@ elif not st.session_state.quiz_finished:
         with c1:
             pw_input = st.text_input("확인", type="password", key="quick_admin_pw", label_visibility="collapsed", placeholder="교사 확인")
         with c2:
-            if st.button("결과화면 점프", key="quick_jump_btn", use_container_width=True):
+            if st.button("결과확", key="quick_jump_btn", use_container_width=True):
                 if pw_input == TEACHER_PASSWORD:
                     st.session_state.quiz_finished = True
                     st.rerun()
@@ -474,7 +474,7 @@ else:
 
     st.header(f"🎉 {st.session_state.student_name or '선생님'} 님, 평가 완료!")
     st.subheader(f"첫 시도 정답: {total_count}문항 중 {correct_count}개")
-    st.write("평가 결과는 **선생님 기록부에 자동 저장**되었습니다.")
+    st.write("평가 결과는 **선생님 기록부에 자동 저장**됩니다.")
     st.write("---")
 
     tab1, tab2 = st.tabs(["📊 나의 결과 & 오답노트", f"📚 전체 {total_count}문항 한눈에 다시 보기"])
