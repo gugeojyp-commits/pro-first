@@ -14,42 +14,37 @@ st.set_page_config(
 # 🔗 [필수 설정] 구글 시트 배포 URL 및 선생님 비밀번호
 # -----------------------------------------------------------------------------
 GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/여기에_복사한_배포_URL을_붙여넣으세요/exec"
-TEACHER_PASSWORD = "teacher777"  # 선생님 테스트용 비밀번호 (자유롭게 변경 가능)
+TEACHER_PASSWORD = "teacher777"  # 선생님 테스트용 비밀번호
 
 # -----------------------------------------------------------------------------
-# 🎨 UI 스타일 (CSS) - 아이콘 깨짐 및 글자 겹침 방지 패치 완료
+# 🎨 UI 스타일 (CSS) - 아이콘 폰트 간섭 완전 차단
 # -----------------------------------------------------------------------------
 custom_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&family=Jua&display=swap');
-
-/* 아이콘 폰트 충돌 방지: 특정 텍스트 요소에만 한글 폰트 적용 */
-html, body, p, label, input, .question-text, .main-title, .category-badge, .explanation-box {
-    font-family: 'Pretendard', sans-serif !important;
-}
-
+/* 배경 디자인 */
 .stApp {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
+/* 제목 스타일 */
 .main-title {
     background: linear-gradient(135deg, #4F46E5, #7C3AED);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-align: center;
-    font-size: 2.2rem !important;
+    font-size: 2.1rem !important;
     font-weight: 800;
     margin-bottom: 25px;
     letter-spacing: -0.5px;
 }
 
+/* 퀴즈 카드 */
 .quiz-card {
     background: #ffffff;
     padding: 24px;
     border-radius: 20px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(10px);
     margin-bottom: 20px;
     position: relative;
     overflow: hidden;
@@ -83,19 +78,7 @@ html, body, p, label, input, .question-text, .main-title, .category-badge, .expl
     line-height: 1.5;
 }
 
-.stTextInput > div > div > input {
-    border-radius: 14px !important;
-    border: 2px solid #E5E7EB !important;
-    font-size: 1.05rem !important;
-    padding: 10px 16px !important;
-    background: #F9FAFB !important;
-}
-
-.stTextInput > div > div > input:focus {
-    border-color: #6366F1 !important;
-    background: #FFFFFF !important;
-}
-
+/* 라디오 버튼 카드 느낌 */
 div[role="radiogroup"] > label {
     background: #F9FAFB !important;
     border: 2px solid #E5E7EB !important;
@@ -104,6 +87,7 @@ div[role="radiogroup"] > label {
     margin-bottom: 6px !important;
 }
 
+/* 주요 버튼 */
 .stButton > button {
     border-radius: 16px !important;
     font-size: 1.05rem !important;
@@ -115,6 +99,7 @@ div[role="radiogroup"] > label {
     box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25) !important;
 }
 
+/* 해설 박스 */
 .explanation-box {
     background: #F0F9FF;
     border-left: 5px solid #0EA5E9;
@@ -125,18 +110,12 @@ div[role="radiogroup"] > label {
     font-size: 0.95rem;
     line-height: 1.55;
 }
-
-/* expander 헤더 겹침 방지 */
-.streamlit-expanderHeader {
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-}
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 📚 원본 퀴즈 데이터 (총 30문항 완비)
+# 📚 원본 퀴즈 데이터 (선생님의 원본 30문항 구성)
 # -----------------------------------------------------------------------------
 RAW_QUIZ_DATA = {
     "1. 표준 발음의 개념과 원칙": [
@@ -389,97 +368,17 @@ RAW_QUIZ_DATA = {
             "answer": "1. 마나서",
             "explanation": "겹받침 'ㄶ' 뒤에 모음으로 시작하는 어미 '-아서'가 오면 'ㅎ'이 탈락하고 'ㄴ'만 넘어가 [마나서]로 발음됩니다."
         }
-    ],
-    "4. 음운 변동과 표준 발음 심화": [
-        {
-            "id": 19,
-            "type": "short",
-            "question": "받침 'ㄷ, ㅌ'이 모음 'ㅣ'나 반모음 'ㅣ'로 시작하는 형식 형태소와 만나 각각 [ㅈ, ㅊ]으로 바뀌어 소리 나는 현상을 무엇이라 하는지 쓰시오.",
-            "answer": "구개음화",
-            "explanation": "받침 'ㄷ, ㅌ'이 모음 'ㅣ'로 시작하는 형식 형태소를 만날 때 경구개음인 [ㅈ, ㅊ]으로 바뀌는 현상을 '구개음화'라고 합니다. (예: 굳이[구지], 같이[가치])"
-        },
-        {
-            "id": 20,
-            "type": "short",
-            "question": "'굳히다'의 최종 표준 발음을 쓰시오.",
-            "answer": "구치다",
-            "explanation": "받침 'ㄷ' 뒤에 접미사 '히'가 오면 먼저 거센소리되기(자음 축약)에 의해 [구티다]가 된 후, 모음 'ㅣ' 앞에서 구개음화가 일어나 최종 발음은 [구치다]가 됩니다."
-        },
-        {
-            "id": 21,
-            "type": "short",
-            "question": "단어 '국물'의 올바른 표준 발음을 쓰시오.",
-            "answer": "궁물",
-            "explanation": "받침 'ㄱ' 뒤에 비음 'ㅁ'이 오면 비음의 영향을 받아 앞 자음이 비음 [ㅇ]으로 바뀌는 비음화 현상이 일어나 [궁물]로 발음합니다."
-        },
-        {
-            "id": 22,
-            "type": "choice",
-            "question": "'신라'의 올바른 표준 발음은?",
-            "options": ["1. 신라", "2. 실라"],
-            "answer": "2. 실라",
-            "explanation": "'ㄴ'과 'ㄹ'이 인접할 때 'ㄴ'이 유음 'ㄹ'로 바뀌어 소리 나는 유음화 현상이 적용되어 [실라]로 발음합니다."
-        },
-        {
-            "id": 23,
-            "type": "choice",
-            "question": "'국밥'을 발음할 때 일어나는 음운 변동으로 알맞은 것은?",
-            "options": [
-                "1. 된소리되기 (경음화)",
-                "2. 거센소리되기 (격음화)"
-            ],
-            "answer": "1. 된소리되기 (경음화)",
-            "explanation": "받침 'ㄱ, ㄷ, ㅂ' 뒤에 연결되는 'ㄱ, ㄷ, ㅂ, ㅅ, ㅈ'은 예사소리가 된소리로 바뀌는 된소리되기(경음화)가 일어나 [국빱]으로 발음합니다."
-        },
-        {
-            "id": 24,
-            "type": "choice",
-            "question": "'솜이불'의 표준 발음으로 올바른 것은?",
-            "options": ["1. 소미불", "2. 솜니불"],
-            "answer": "2. 솜니불",
-            "explanation": "합성어에서 앞 단어의 끝이 자음이고 뒤 단어의 첫음절이 '이, 야, 여, 요, 유'인 경우 'ㄴ' 소리가 덧나는 'ㄴ 첨가' 현상이 발생하여 [솜니불]로 발음합니다."
-        },
-        {
-            "id": 25,
-            "type": "short",
-            "question": "'놓고'의 올바른 표준 발음을 쓰시오.",
-            "answer": "노코",
-            "explanation": "받침 'ㅎ' 뒤에 'ㄱ'이 오면 두 자음이 결합하여 거센소리 [ㅋ]으로 축약되므로 [노코]로 발음합니다."
-        },
-        {
-            "id": 26,
-            "type": "choice",
-            "question": "'쌓이다'의 올바른 표준 발음은?",
-            "options": ["1. 싸이다", "2. 싸히다"],
-            "answer": "1. 싸이다",
-            "explanation": "받침 'ㅎ' 뒤에 모음으로 시작하는 접미사나 어미가 연결되면 'ㅎ'은 발음되지 않고 탈락하므로 [싸이다]로 발음합니다."
-        },
-        {
-            "id": 27,
-            "type": "choice",
-            "question": "'넓죽하다'의 올바른 표준 발음은?",
-            "options": ["1. 넙쭈카다", "2. 널쭈카다"],
-            "answer": "1. 넙쭈카다",
-            "explanation": "겹받침 'ㄼ'은 원칙적으로 [ㄹ]로 발음하지만, '넓죽하다', '넓둥글다'의 경우 예외적으로 [ㅂ]으로 발음하므로 [넙쭈카다]가 맞습니다."
-        },
-        {
-            "id": 28,
-            "type": "short",
-            "question": "용언 어간의 받침 'ㄴ, ㅁ' 뒤에 결합하는 어미의 첫소리 'ㄱ, ㄷ, ㅅ, ㅈ'은 된소리로 발음합니다. '신고(신발을)'의 올바른 표준 발음을 쓰시오.",
-            "answer": "신꼬",
-            "explanation": "어간 받침 'ㄴ(ㄵ), ㅁ(ㄻ)' 뒤에 오는 어미의 첫소리 'ㄱ, ㄷ, ㅅ, ㅈ'은 된소리로 바뀌므로 [신꼬]로 발음합니다."
-        }
     ]
 }
 
-# 텍스트 정제 헬퍼 함수 (공백, 기호 유연성 처리)
+# 텍스트 정제 함수
 def clean_text(text):
     if isinstance(text, list):
         return [t.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",") for t in text]
     return text.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",")
 
 # -----------------------------------------------------------------------------
-# 1. 초기 퀴즈 상태 세팅
+# 1. 상태 관리 초기화
 # -----------------------------------------------------------------------------
 def reset_full_quiz():
     shuffled_list = []
@@ -509,6 +408,17 @@ if "user_info_submitted" not in st.session_state:
 
 if "quiz_list" not in st.session_state:
     reset_full_quiz()
+
+# 🔑 [사이드바] 선생님 전용 점프 메뉴
+with st.sidebar:
+    st.markdown("### 🔒 교사용 메뉴")
+    pw_input = st.text_input("교사 비밀번호", type="password", key="sidebar_admin_pw")
+    if st.button("마지막 결과 화면으로 점프", use_container_width=True):
+        if pw_input == TEACHER_PASSWORD:
+            st.session_state.quiz_finished = True
+            st.rerun()
+        else:
+            st.error("비밀번호가 일치하지 않습니다.")
 
 st.markdown('<div class="main-title">✏️ [국어] 표준 발음과 받침 형성 평가</div>', unsafe_allow_html=True)
 
@@ -547,27 +457,12 @@ elif not st.session_state.quiz_finished:
     curr_idx = st.session_state.current_index
     curr_q = quiz_list[curr_idx]
 
-    # 상단 정보 바 (겹침 현상 완전 제거)
     col_info, col_prog = st.columns([1, 1])
     with col_info:
         st.markdown(f"👤 **학생:** {st.session_state.student_name} ({st.session_state.student_id})")
     with col_prog:
         st.markdown(f"<p style='text-align: right; font-weight:700; color:#4B5563;'>진행: {curr_idx + 1} / {total_q}</p>", unsafe_allow_html=True)
     
-    # 🔑 [교사 전용 패스 기능] 1번 문제에서만 접이식으로 깔끔하게 제공
-    if curr_idx == 0:
-        with st.expander("🔒 교사용 테스트 점프 (비밀번호)", expanded=False):
-            c_pw, c_btn = st.columns([3, 1])
-            with c_pw:
-                pw_input = st.text_input("비밀번호", type="password", key="admin_pw", label_visibility="collapsed", placeholder="비밀번호 입력")
-            with c_btn:
-                if st.button("점프", key="jump_btn", use_container_width=True):
-                    if pw_input == TEACHER_PASSWORD:
-                        st.session_state.quiz_finished = True
-                        st.rerun()
-                    else:
-                        st.error("비밀번호 불일치")
-
     st.progress((curr_idx + 1) / total_q)
     st.write("")
 
@@ -611,7 +506,7 @@ elif not st.session_state.quiz_finished:
         else:
             st.warning("⚠️ 먼저 정답을 입력하거나 선택해 주세요.")
 
-    # 해설 및 다음 단계 이동
+    # 해설 및 이동 제어
     if st.session_state.checked_status.get(curr_q["id"], False):
         ans = st.session_state.user_answers.get(curr_q["id"], "")
         is_passed = st.session_state.passed_status.get(curr_q["id"], False)
@@ -641,7 +536,7 @@ elif not st.session_state.quiz_finished:
             st.caption("🔒 **정답을 맞혀야 다음 문제로 넘어갈 수 있습니다.**")
 
 # -----------------------------------------------------------------------------
-# 4. 최종 완료 화면 (결과 보고 + 30문항 전체 복습 탭)
+# 4. 최종 완료 화면 (정확히 30문항 결과 보고 및 복습 탭)
 # -----------------------------------------------------------------------------
 else:
     wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.first_attempt_status.get(q["id"], False)]
@@ -649,7 +544,7 @@ else:
     correct_count = total_count - len(wrong_q_list)
     wrong_ids_str = ", ".join([str(q["id"]) for q in wrong_q_list]) if wrong_q_list else "없음"
 
-    # 📤 스프레드시트 자동 실시간 전송 (학생 정보가 있을 때 1회만 전송)
+    # 📤 스프레드시트 실시간 전송 (학생 정보가 있을 때 1회만 전송)
     if st.session_state.student_id and not st.session_state.get("sheet_submitted", False):
         payload = {
             "student_id": st.session_state.student_id,
@@ -683,7 +578,6 @@ else:
     </div>
     """, unsafe_allow_html=True)
 
-    # 🌟 탭으로 영역 분리: 결과/오답노트 vs 학생들이 푼 전체 문항 한눈에 다시 풀기
     tab1, tab2 = st.tabs(["📊 나의 결과 & 오답노트", f"📚 전체 {total_count}문항 한눈에 다시 보기"])
 
     # ---------------- 탭 1: 결과 및 오답노트 ----------------
@@ -698,7 +592,7 @@ else:
                 st.session_state.checked_status = {}
                 st.session_state.first_attempt_status = {}
                 st.session_state.quiz_finished = False
-                st.session_state.sheet_submitted = True  # 재도전 시 시트 중복 전송 방지
+                st.session_state.sheet_submitted = True
                 st.rerun()
         else:
             st.success("💯 첫 번째 시도에서 모든 문제를 완벽하게 맞혔습니다!")
@@ -710,9 +604,9 @@ else:
                     del st.session_state[key]
                 st.rerun()
 
-    # ---------------- 탭 2: 학생들이 푼 전체 문항 한눈에 다시 보기 ----------------
+    # ---------------- 탭 2: 전체 30문항 한 페이지에서 복습 ----------------
     with tab2:
-        st.info(f"💡 전체 {total_count}개 문항을 자율적으로 다시 연습하고, 아래 [정답 및 해설 열기]를 눌러 교과서 개념을 최종 확인하세요.")
+        st.info(f"💡 전체 {total_count}개 문항을 자율적으로 다시 연습하고, 아래 [정답 및 해설]을 열어 교과서 개념을 최종 확인하세요.")
         
         all_questions = []
         for cat, items in RAW_QUIZ_DATA.items():
@@ -728,14 +622,14 @@ else:
                 </div>
                 """, unsafe_allow_html=True)
                 
-                # 자율 풀이 영역
+                # 자율 연습 입력창
                 if q["type"] == "short":
                     st.text_input("답안 연습:", placeholder="답안을 직접 적어보세요...", key=f"all_view_input_{q['id']}")
                 else:
                     st.radio("답안 연습:", q["options"], index=None, key=f"all_view_opt_{q['id']}", label_visibility="collapsed")
                 
                 # 정답 및 해설 토글창
-                with st.expander(f"Q{idx + 1} 정답 및 해설 열기"):
+                with st.expander(f"Q{idx + 1} 정답 및 해설"):
                     ans_display = q['answer'] if isinstance(q['answer'], str) else q['answer'][0]
                     st.markdown(f"**정답:** `{ans_display}`")
                     st.markdown(f"""
