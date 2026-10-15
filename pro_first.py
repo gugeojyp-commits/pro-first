@@ -11,13 +11,21 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
+# ⚠️ [필수] 이전 세션(40문항 및 깨진 CSS) 강제 박멸 루틴
+# -----------------------------------------------------------------------------
+APP_VERSION = "v30_clean_final"
+if st.session_state.get("app_version") != APP_VERSION:
+    st.session_state.clear()
+    st.session_state.app_version = APP_VERSION
+
+# -----------------------------------------------------------------------------
 # 🔗 [설정] 구글 시트 배포 URL 및 교사용 테스트 비밀번호
 # -----------------------------------------------------------------------------
 GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/여기에_배포_URL을_넣으세요/exec"
 TEACHER_PASSWORD = "teacher777"
 
 # -----------------------------------------------------------------------------
-# 📚 원본 퀴즈 데이터 (선생님의 원본 정확히 30문항)
+# 📚 원본 퀴즈 데이터 (정확히 30문항 고정)
 # -----------------------------------------------------------------------------
 RAW_QUIZ_DATA = {
     "1. 표준 발음의 개념과 원칙": [
@@ -279,7 +287,7 @@ def clean_text(text):
     return text.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",")
 
 # -----------------------------------------------------------------------------
-# 1. 초기 퀴즈 세팅
+# 1. 초기 퀴즈 데이터 세팅
 # -----------------------------------------------------------------------------
 def reset_full_quiz():
     shuffled_list = []
@@ -307,23 +315,21 @@ if "student_name" not in st.session_state:
 if "user_info_submitted" not in st.session_state:
     st.session_state.user_info_submitted = False
 
-# 혹시 이전 40문항 캐시가 남아있는 경우 강제로 30문항으로 초기화
 if "quiz_list" not in st.session_state or len(st.session_state.quiz_list) != 30:
     reset_full_quiz()
 
 st.title("✏️ [국어] 표준 발음과 받침 형성 평가")
 
 # -----------------------------------------------------------------------------
-# 2. 학생 정보 입력 화면
+# 2. 학생 정보 입력 단계
 # -----------------------------------------------------------------------------
 if not st.session_state.user_info_submitted:
-    st.subheader("👤 감일고 2학년 학생 정보 입력")
-    st.write("학번과 이름을 정확히 입력하고 시작하세요. (총 30문항)")
+    st.subheader("👤 학생 정보 입력")
+    st.write("학번과 이름을 입력하고 시작하세요. (총 30문항)")
     
     s_id = st.text_input("학번을 입력하세요 (예: 20101)", key="input_s_id")
     s_name = st.text_input("이름을 입력하세요", key="input_s_name")
     
-    st.write("")
     if st.button("🚀 평가 시작하기", use_container_width=True):
         if s_id.strip() and s_name.strip():
             st.session_state.student_id = s_id.strip()
@@ -334,7 +340,7 @@ if not st.session_state.user_info_submitted:
             st.warning("⚠️ 학번과 이름을 모두 입력해 주세요!")
 
 # -----------------------------------------------------------------------------
-# 3. 개별 문제 풀이 화면
+# 3. 개별 문제 풀이 단계
 # -----------------------------------------------------------------------------
 elif not st.session_state.quiz_finished:
     quiz_list = st.session_state.quiz_list
@@ -355,9 +361,9 @@ elif not st.session_state.quiz_finished:
     if curr_idx == 0:
         c1, c2 = st.columns([3, 1])
         with c1:
-            pw_input = st.text_input("교사 비밀번호", type="password", key="jump_pw_input", label_visibility="collapsed", placeholder="교사용 비밀번호 입력")
+            pw_input = st.text_input("교사 비밀번호", type="password", key="quick_admin_pw", label_visibility="collapsed", placeholder="교사 비밀번호 입력시 바로 결과 확인")
         with c2:
-            if st.button("결과화면 점프", key="jump_act_btn", use_container_width=True):
+            if st.button("결과화면 점프", key="quick_jump_btn", use_container_width=True):
                 if pw_input == TEACHER_PASSWORD:
                     st.session_state.quiz_finished = True
                     st.rerun()
@@ -365,7 +371,7 @@ elif not st.session_state.quiz_finished:
                     st.error("비밀번호 불일치")
         st.write("---")
 
-    # 문제 본문
+    # 문제 카드 영역
     st.caption(f"📌 {curr_q['category']}")
     st.subheader(f"Q{curr_idx + 1}. {curr_q['question']}")
 
@@ -380,7 +386,6 @@ elif not st.session_state.quiz_finished:
 
     st.write("")
 
-    # 정답 검증 버튼
     if st.button("🔍 정답 확인 및 해설 보기", key=f"check_btn_{curr_q['id']}", use_container_width=True):
         if user_input:
             st.session_state.user_answers[curr_q["id"]] = user_input
@@ -402,7 +407,6 @@ elif not st.session_state.quiz_finished:
         else:
             st.warning("⚠️ 먼저 정답을 입력하거나 선택해 주세요.")
 
-    # 해설 및 다음 단계 이동
     if st.session_state.checked_status.get(curr_q["id"], False):
         ans = st.session_state.user_answers.get(curr_q["id"], "")
         is_passed = st.session_state.passed_status.get(curr_q["id"], False)
@@ -428,7 +432,7 @@ elif not st.session_state.quiz_finished:
             st.caption("🔒 **정답을 맞혀야 다음 문제로 넘어갈 수 있습니다.**")
 
 # -----------------------------------------------------------------------------
-# 4. 최종 완료 화면 (정확히 30문항 결과 보고 및 복습)
+# 4. 최종 완료 화면
 # -----------------------------------------------------------------------------
 else:
     wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.first_attempt_status.get(q["id"], False)]
@@ -436,7 +440,6 @@ else:
     correct_count = total_count - len(wrong_q_list)
     wrong_ids_str = ", ".join([str(q["id"]) for q in wrong_q_list]) if wrong_q_list else "없음"
 
-    # 스프레드시트 실시간 자동 전송
     if st.session_state.student_id and not st.session_state.get("sheet_submitted", False):
         payload = {
             "student_id": st.session_state.student_id,
@@ -465,7 +468,6 @@ else:
 
     tab1, tab2 = st.tabs(["📊 나의 결과 & 오답노트", f"📚 전체 {total_count}문항 한눈에 다시 보기"])
 
-    # ---------------- 탭 1: 결과 및 오답노트 ----------------
     with tab1:
         if len(wrong_q_list) > 0:
             st.warning(f"⚠️ 처음 시도에서 틀렸던 문제가 **{len(wrong_q_list)}개** 있습니다.")
@@ -489,7 +491,6 @@ else:
                     del st.session_state[key]
                 st.rerun()
 
-    # ---------------- 탭 2: 전체 30문항 한 페이지에서 복습 ----------------
     with tab2:
         st.info(f"💡 전체 {total_count}개 문항을 자율적으로 다시 연습하고, 아래 [정답 및 해설]을 열어 확인하세요.")
         
