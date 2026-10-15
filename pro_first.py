@@ -21,8 +21,8 @@ if st.session_state.get("app_version") != APP_VERSION:
 # -----------------------------------------------------------------------------
 # 🔗 [설정] 구글 시트 배포 URL 및 교사용 테스트 비밀번호
 # -----------------------------------------------------------------------------
-GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/여기에_배포_URL을_넣으세요/exec"
-TEACHER_PASSWORD = "teacher777"
+GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/sAKfycbymuGKCOqviCjqn3PEab4ubtf_m5cf1Gj184kGTgFqm0nBrOSKX7_oc9V_Wjv73AbGTAA/exec"
+TEACHER_PASSWORD = "01063052122"
 
 # -----------------------------------------------------------------------------
 # 📚 원본 퀴즈 데이터 (정확히 30문항 고정)
