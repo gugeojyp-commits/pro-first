@@ -17,16 +17,16 @@ GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/여기에_복사�
 TEACHER_PASSWORD = "teacher777"  # 선생님 테스트용 비밀번호
 
 # -----------------------------------------------------------------------------
-# 🎨 UI 스타일 (CSS) - 아이콘 폰트 간섭 완전 차단
+# 🎨 UI 스타일 (CSS) - 아이콘 깨짐 방지: 전역 폰트 강제 적용 완전 제거
 # -----------------------------------------------------------------------------
 custom_css = """
 <style>
-/* 배경 디자인 */
+/* 배경 그라데이션 */
 .stApp {
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
-/* 제목 스타일 */
+/* 상단 제목 */
 .main-title {
     background: linear-gradient(135deg, #4F46E5, #7C3AED);
     -webkit-background-clip: text;
@@ -38,7 +38,7 @@ custom_css = """
     letter-spacing: -0.5px;
 }
 
-/* 퀴즈 카드 */
+/* 퀴즈 카드 디자인 */
 .quiz-card {
     background: #ffffff;
     padding: 24px;
@@ -72,22 +72,13 @@ custom_css = """
 }
 
 .question-text {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 700;
     color: #1F2937;
     line-height: 1.5;
 }
 
-/* 라디오 버튼 카드 느낌 */
-div[role="radiogroup"] > label {
-    background: #F9FAFB !important;
-    border: 2px solid #E5E7EB !important;
-    border-radius: 14px !important;
-    padding: 10px 18px !important;
-    margin-bottom: 6px !important;
-}
-
-/* 주요 버튼 */
+/* 주요 제출 버튼 */
 .stButton > button {
     border-radius: 16px !important;
     font-size: 1.05rem !important;
@@ -99,7 +90,7 @@ div[role="radiogroup"] > label {
     box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25) !important;
 }
 
-/* 해설 박스 */
+/* 교과서 해설 박스 */
 .explanation-box {
     background: #F0F9FF;
     border-left: 5px solid #0EA5E9;
@@ -115,7 +106,7 @@ div[role="radiogroup"] > label {
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # -----------------------------------------------------------------------------
-# 📚 원본 퀴즈 데이터 (선생님의 원본 30문항 구성)
+# 📚 원본 퀴즈 데이터 (선생님의 원본 정확히 30문항 완비)
 # -----------------------------------------------------------------------------
 RAW_QUIZ_DATA = {
     "1. 표준 발음의 개념과 원칙": [
@@ -409,7 +400,7 @@ if "user_info_submitted" not in st.session_state:
 if "quiz_list" not in st.session_state:
     reset_full_quiz()
 
-# 🔑 [사이드바] 선생님 전용 점프 메뉴
+# 🔑 [사이드바] 선생님 전용 점프 메뉴 (화면 밖 사이드바에 완전히 격리)
 with st.sidebar:
     st.markdown("### 🔒 교사용 메뉴")
     pw_input = st.text_input("교사 비밀번호", type="password", key="sidebar_admin_pw")
@@ -595,46 +586,4 @@ else:
                 st.session_state.sheet_submitted = True
                 st.rerun()
         else:
-            st.success("💯 첫 번째 시도에서 모든 문제를 완벽하게 맞혔습니다!")
-
-        st.write("")
-        with st.expander("🔄 처음부터 전체 문제 다시 시작하기"):
-            if st.button("초기화 후 새로 시작하기", use_container_width=True):
-                for key in list(st.session_state.keys()):
-                    del st.session_state[key]
-                st.rerun()
-
-    # ---------------- 탭 2: 전체 30문항 한 페이지에서 복습 ----------------
-    with tab2:
-        st.info(f"💡 전체 {total_count}개 문항을 자율적으로 다시 연습하고, 아래 [정답 및 해설]을 열어 교과서 개념을 최종 확인하세요.")
-        
-        all_questions = []
-        for cat, items in RAW_QUIZ_DATA.items():
-            for item in items:
-                all_questions.append((cat, item))
-
-        for idx, (category_name, q) in enumerate(all_questions):
-            with st.container():
-                st.markdown(f"""
-                <div style="background:#ffffff; padding:18px; border-radius:14px; border:1px solid #E5E7EB; margin-bottom:12px;">
-                    <span style="font-size:0.8rem; background:#F3F4F6; color:#4F46E5; padding:3px 8px; border-radius:6px; font-weight:700;">{category_name}</span>
-                    <p style="font-size:1.05rem; font-weight:700; color:#1F2937; margin:8px 0;">{idx + 1}. {q['question']}</p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                # 자율 연습 입력창
-                if q["type"] == "short":
-                    st.text_input("답안 연습:", placeholder="답안을 직접 적어보세요...", key=f"all_view_input_{q['id']}")
-                else:
-                    st.radio("답안 연습:", q["options"], index=None, key=f"all_view_opt_{q['id']}", label_visibility="collapsed")
-                
-                # 정답 및 해설 토글창
-                with st.expander(f"Q{idx + 1} 정답 및 해설"):
-                    ans_display = q['answer'] if isinstance(q['answer'], str) else q['answer'][0]
-                    st.markdown(f"**정답:** `{ans_display}`")
-                    st.markdown(f"""
-                    <div class="explanation-box" style="margin-top:5px;">
-                        <b>💡 교과서 원리 해설:</b> {q['explanation']}
-                    </div>
-                    """, unsafe_allow_html=True)
-                st.write("")
+            st.success("💯 첫 번째 시도에서
