@@ -11,102 +11,13 @@ st.set_page_config(
 )
 
 # -----------------------------------------------------------------------------
-# 🔗 [필수 설정] 구글 시트 배포 URL 및 선생님 비밀번호
+# 🔗 [설정] 구글 시트 배포 URL 및 교사 비밀번호
 # -----------------------------------------------------------------------------
 GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/여기에_복사한_배포_URL을_붙여넣으세요/exec"
-TEACHER_PASSWORD = "teacher777"  # 선생님 테스트용 비밀번호
+TEACHER_PASSWORD = "teacher777"
 
 # -----------------------------------------------------------------------------
-# 🎨 UI 스타일 (CSS) - 아이콘 깨짐 방지: 전역 폰트 강제 적용 완전 제거
-# -----------------------------------------------------------------------------
-custom_css = """
-<style>
-/* 배경 그라데이션 */
-.stApp {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-}
-
-/* 상단 제목 */
-.main-title {
-    background: linear-gradient(135deg, #4F46E5, #7C3AED);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-align: center;
-    font-size: 2.1rem !important;
-    font-weight: 800;
-    margin-bottom: 25px;
-    letter-spacing: -0.5px;
-}
-
-/* 퀴즈 카드 디자인 */
-.quiz-card {
-    background: #ffffff;
-    padding: 24px;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    margin-bottom: 20px;
-    position: relative;
-    overflow: hidden;
-}
-
-.quiz-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background: linear-gradient(90deg, #6366F1, #8B5CF6);
-}
-
-.category-badge {
-    display: inline-block;
-    background: #EEF2FF;
-    color: #4F46E5;
-    padding: 5px 12px;
-    border-radius: 30px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.question-text {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #1F2937;
-    line-height: 1.5;
-}
-
-/* 주요 제출 버튼 */
-.stButton > button {
-    border-radius: 16px !important;
-    font-size: 1.05rem !important;
-    font-weight: 700 !important;
-    padding: 10px 20px !important;
-    border: none !important;
-    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%) !important;
-    color: white !important;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25) !important;
-}
-
-/* 교과서 해설 박스 */
-.explanation-box {
-    background: #F0F9FF;
-    border-left: 5px solid #0EA5E9;
-    padding: 14px 18px;
-    border-radius: 12px;
-    margin-top: 12px;
-    color: #0369A1;
-    font-size: 0.95rem;
-    line-height: 1.55;
-}
-</style>
-"""
-st.markdown(custom_css, unsafe_allow_html=True)
-
-# -----------------------------------------------------------------------------
-# 📚 원본 퀴즈 데이터 (선생님의 원본 정확히 30문항 완비)
+# 📚 원본 퀴즈 데이터 (정확히 30문항)
 # -----------------------------------------------------------------------------
 RAW_QUIZ_DATA = {
     "1. 표준 발음의 개념과 원칙": [
@@ -362,14 +273,13 @@ RAW_QUIZ_DATA = {
     ]
 }
 
-# 텍스트 정제 함수
 def clean_text(text):
     if isinstance(text, list):
         return [t.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",") for t in text]
     return text.replace(" ", "").replace("[", "").replace("]", "").replace(".", ",").replace("/", ",")
 
 # -----------------------------------------------------------------------------
-# 1. 상태 관리 초기화
+# 1. 초기 퀴즈 데이터 세팅
 # -----------------------------------------------------------------------------
 def reset_full_quiz():
     shuffled_list = []
@@ -397,50 +307,33 @@ if "student_name" not in st.session_state:
 if "user_info_submitted" not in st.session_state:
     st.session_state.user_info_submitted = False
 
-if "quiz_list" not in st.session_state:
+# ⚠️ 기존 40문항 캐시가 남아있는 경우 즉시 30문항으로 초기화
+if "quiz_list" not in st.session_state or len(st.session_state.quiz_list) != 30:
     reset_full_quiz()
 
-# 🔑 [사이드바] 선생님 전용 점프 메뉴 (화면 밖 사이드바에 완전히 격리)
-with st.sidebar:
-    st.markdown("### 🔒 교사용 메뉴")
-    pw_input = st.text_input("교사 비밀번호", type="password", key="sidebar_admin_pw")
-    if st.button("마지막 결과 화면으로 점프", use_container_width=True):
-        if pw_input == TEACHER_PASSWORD:
-            st.session_state.quiz_finished = True
-            st.rerun()
-        else:
-            st.error("비밀번호가 일치하지 않습니다.")
-
-st.markdown('<div class="main-title">✏️ [국어] 표준 발음과 받침 형성 평가</div>', unsafe_allow_html=True)
+st.title("✏️ [국어] 표준 발음과 받침 형성 평가")
 
 # -----------------------------------------------------------------------------
-# 2. 학생 정보 입력 화면
+# 2. 학생 정보 입력 단계
 # -----------------------------------------------------------------------------
 if not st.session_state.user_info_submitted:
-    total_q_count = len(st.session_state.quiz_list)
-    st.markdown(f"""
-    <div class="quiz-card" style="text-align: center;">
-        <h3 style="color: #4F46E5; margin-bottom: 8px;">👤 감일고 2학년 학생 정보 입력</h3>
-        <p style="color: #6B7280; font-size: 0.95rem;">학번과 이름을 정확히 입력하고 시작하세요. (총 {total_q_count}문항)</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.subheader("👤 감일고 2학년 학생 정보 입력")
+    st.write("학번과 이름을 입력하고 시작하세요. (총 30문항)")
     
-    with st.container():
-        s_id = st.text_input("학번을 입력하세요 (예: 20101)", key="input_s_id")
-        s_name = st.text_input("이름을 입력하세요", key="input_s_name")
-        
-        st.write("")
-        if st.button("🚀 평가 시작하기", use_container_width=True):
-            if s_id.strip() and s_name.strip():
-                st.session_state.student_id = s_id.strip()
-                st.session_state.student_name = s_name.strip()
-                st.session_state.user_info_submitted = True
-                st.rerun()
-            else:
-                st.warning("⚠️ 학번과 이름을 모두 입력해 주세요!")
+    s_id = st.text_input("학번을 입력하세요 (예: 20101)", key="input_s_id")
+    s_name = st.text_input("이름을 입력하세요", key="input_s_name")
+    
+    if st.button("🚀 평가 시작하기", use_container_width=True):
+        if s_id.strip() and s_name.strip():
+            st.session_state.student_id = s_id.strip()
+            st.session_state.student_name = s_name.strip()
+            st.session_state.user_info_submitted = True
+            st.rerun()
+        else:
+            st.warning("⚠️ 학번과 이름을 모두 입력해 주세요!")
 
 # -----------------------------------------------------------------------------
-# 3. 개별 문제 풀이 화면
+# 3. 개별 문제 풀이 단계
 # -----------------------------------------------------------------------------
 elif not st.session_state.quiz_finished:
     quiz_list = st.session_state.quiz_list
@@ -450,19 +343,30 @@ elif not st.session_state.quiz_finished:
 
     col_info, col_prog = st.columns([1, 1])
     with col_info:
-        st.markdown(f"👤 **학생:** {st.session_state.student_name} ({st.session_state.student_id})")
+        st.write(f"👤 **학생:** {st.session_state.student_name} ({st.session_state.student_id})")
     with col_prog:
-        st.markdown(f"<p style='text-align: right; font-weight:700; color:#4B5563;'>진행: {curr_idx + 1} / {total_q}</p>", unsafe_allow_html=True)
+        st.write(f"🎯 **진행:** {curr_idx + 1} / {total_q} 문항")
     
     st.progress((curr_idx + 1) / total_q)
     st.write("")
 
-    st.markdown(f"""
-    <div class="quiz-card">
-        <div class="category-badge">📌 {curr_q['category']}</div>
-        <div class="question-text">Q{curr_idx + 1}. {curr_q['question']}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    # 1번 문제에서 교사용 점프 기능 (텍스트 입력창과 버튼을 일렬 배치)
+    if curr_idx == 0:
+        c1, c2 = st.columns([3, 1])
+        with c1:
+            pw_input = st.text_input("교사 비밀번호", type="password", key="quick_admin_pw", label_visibility="collapsed", placeholder="교사 비밀번호 입력시 바로 결과 확인")
+        with c2:
+            if st.button("결과화면 점프", key="quick_jump_btn", use_container_width=True):
+                if pw_input == TEACHER_PASSWORD:
+                    st.session_state.quiz_finished = True
+                    st.rerun()
+                else:
+                    st.error("비밀번호 불일치")
+        st.write("---")
+
+    # 문제 카드 영역
+    st.caption(f"📌 {curr_q['category']}")
+    st.subheader(f"Q{curr_idx + 1}. {curr_q['question']}")
 
     saved_ans = st.session_state.user_answers.get(curr_q["id"], "")
     
@@ -497,7 +401,7 @@ elif not st.session_state.quiz_finished:
         else:
             st.warning("⚠️ 먼저 정답을 입력하거나 선택해 주세요.")
 
-    # 해설 및 이동 제어
+    # 해설 및 다음 단계 이동
     if st.session_state.checked_status.get(curr_q["id"], False):
         ans = st.session_state.user_answers.get(curr_q["id"], "")
         is_passed = st.session_state.passed_status.get(curr_q["id"], False)
@@ -507,11 +411,7 @@ elif not st.session_state.quiz_finished:
         else:
             st.error(f"❌ **오답입니다. 해설을 확인하고 정답을 맞춰 다음으로 이동하세요.** (내가 낸 답: {ans})")
         
-        st.markdown(f"""
-        <div class="explanation-box">
-            <b>💡 교과서 원리 해설:</b><br>{curr_q['explanation']}
-        </div>
-        """, unsafe_allow_html=True)
+        st.info(f"💡 **교과서 원리 해설:**\n\n{curr_q['explanation']}")
 
         st.write("")
         if st.session_state.passed_status.get(curr_q["id"], False):
@@ -527,7 +427,7 @@ elif not st.session_state.quiz_finished:
             st.caption("🔒 **정답을 맞혀야 다음 문제로 넘어갈 수 있습니다.**")
 
 # -----------------------------------------------------------------------------
-# 4. 최종 완료 화면 (정확히 30문항 결과 보고 및 복습 탭)
+# 4. 최종 완료 화면 (정확히 30문항 결과 보고 및 복습)
 # -----------------------------------------------------------------------------
 else:
     wrong_q_list = [q for q in st.session_state.quiz_list if not st.session_state.first_attempt_status.get(q["id"], False)]
@@ -535,7 +435,7 @@ else:
     correct_count = total_count - len(wrong_q_list)
     wrong_ids_str = ", ".join([str(q["id"]) for q in wrong_q_list]) if wrong_q_list else "없음"
 
-    # 📤 스프레드시트 실시간 전송 (학생 정보가 있을 때 1회만 전송)
+    # 스프레드시트 실시간 전송
     if st.session_state.student_id and not st.session_state.get("sheet_submitted", False):
         payload = {
             "student_id": st.session_state.student_id,
@@ -557,17 +457,10 @@ else:
             pass
 
     st.balloons()
-    st.markdown(f"""
-    <div class="quiz-card" style="text-align: center; padding: 26px 18px;">
-        <h2 style="color: #4F46E5; margin-bottom: 6px;">🎉 {st.session_state.student_name or '선생님'} 님, 평가 완료!</h2>
-        <h3 style="color: #1F2937; font-size: 1.5rem; margin-top: 4px;">
-            첫 시도 정답: {total_count}문항 중 <span style="color:#10B981;">{correct_count}개</span>
-        </h3>
-        <p style="color: #6B7280; font-size: 0.92rem; margin-top: 6px;">
-            평가 결과는 <b>선생님 기록부에 자동 저장</b>되었습니다.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.header(f"🎉 {st.session_state.student_name or '선생님'} 님, 평가 완료!")
+    st.subheader(f"첫 시도 정답: {total_count}문항 중 {correct_count}개")
+    st.write("평가 결과는 **선생님 기록부에 자동 저장**되었습니다.")
+    st.write("---")
 
     tab1, tab2 = st.tabs(["📊 나의 결과 & 오답노트", f"📚 전체 {total_count}문항 한눈에 다시 보기"])
 
@@ -586,4 +479,34 @@ else:
                 st.session_state.sheet_submitted = True
                 st.rerun()
         else:
-            st.success("💯 첫 번째 시도에서
+            st.success("💯 첫 번째 시도에서 모든 문제를 완벽하게 맞혔습니다!")
+
+        st.write("")
+        with st.expander("🔄 처음부터 전체 문제 다시 시작하기"):
+            if st.button("초기화 후 새로 시작하기", use_container_width=True):
+                for key in list(st.session_state.keys()):
+                    del st.session_state[key]
+                st.rerun()
+
+    # ---------------- 탭 2: 전체 30문항 한 페이지에서 복습 ----------------
+    with tab2:
+        st.info(f"💡 전체 {total_count}개 문항을 자율적으로 다시 연습하고, 아래 [정답 및 해설]을 열어 확인하세요.")
+        
+        all_questions = []
+        for cat, items in RAW_QUIZ_DATA.items():
+            for item in items:
+                all_questions.append((cat, item))
+
+        for idx, (category_name, q) in enumerate(all_questions):
+            st.write(f"**[{category_name}] {idx + 1}. {q['question']}**")
+            
+            if q["type"] == "short":
+                st.text_input("답안 연습:", placeholder="답안을 직접 적어보세요...", key=f"all_view_input_{q['id']}")
+            else:
+                st.radio("답안 연습:", q["options"], index=None, key=f"all_view_opt_{q['id']}", label_visibility="collapsed")
+            
+            with st.expander(f"Q{idx + 1} 정답 및 해설 확인"):
+                ans_display = q['answer'] if isinstance(q['answer'], str) else q['answer'][0]
+                st.write(f"**정답:** `{ans_display}`")
+                st.write(f"**💡 해설:** {q['explanation']}")
+            st.write("---")
