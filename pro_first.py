@@ -377,9 +377,9 @@ elif not st.session_state.quiz_finished:
     if curr_idx == 0:
         c1, c2 = st.columns([3, 1])
         with c1:
-            pw_input = st.text_input("확인", type="password", key="quick_admin_pw", label_visibility="collapsed", placeholder="교사 확인")
+            pw_input = st.text_input("확인", type="password", key="quick_admin_pw", label_visibility="collapsed", placeholder="교사 입력")
         with c2:
-            if st.button("결과확", key="quick_jump_btn", use_container_width=True):
+            if st.button("결과확인", key="quick_jump_btn", use_container_width=True):
                 if pw_input == TEACHER_PASSWORD:
                     st.session_state.quiz_finished = True
                     st.rerun()
