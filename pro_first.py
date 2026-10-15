@@ -324,8 +324,8 @@ st.title("✏️ [국어] 표준 발음과 받침 형성 평가")
 # 2. 학생 정보 입력 단계
 # -----------------------------------------------------------------------------
 if not st.session_state.user_info_submitted:
-    st.subheader("👤 학생 정보 입력")
-    st.write("학번과 이름을 입력하고 시작하세요. (총 30문항)")
+    st.subheader("👤 감일고 학생 정보 입력")
+    st.write("학번과 이름을 입력하세요. (총 30문항)")
     
     s_id = st.text_input("학번을 입력하세요 (예: 20101)", key="input_s_id")
     s_name = st.text_input("이름을 입력하세요", key="input_s_name")
